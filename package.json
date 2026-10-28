@@ -1,28 +1,26 @@
 {
-  "name": "habit-tracker-take-home",
-  "module": "index.ts",
-  "type": "module",
-  "private": true,
-  "scripts": {
-    "dev": "bun run index.ts",
-    "start": "bun index.ts",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "prepare": "husky"
-  },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "concurrently": "^10.0.5",
-    "husky": "^9.1.7",
-    "prettier": "^3.9.6"
-  },
-  "workspaces": [
-    "packages/*"
-  ],
-  "peerDependencies": {
-    "typescript": "^5"
-  },
-  "dependencies": {
-    "lint-staged": "^17.6.0"
-  }
+   "name": "habit-tracker-take-home",
+   "module": "index.ts",
+   "type": "module",
+   "private": true,
+   "scripts": {
+      "dev": "bun run index.ts",
+      "start": "bun index.ts",
+      "format": "prettier --write .",
+      "format:check": "prettier --check .",
+      "prepare": "husky"
+   },
+   "devDependencies": {
+      "@types/bun": "latest",
+      "concurrently": "^10.0.5",
+      "husky": "^9.1.7",
+      "lint-staged": "^17.6.0",
+      "prettier": "^3.9.6"
+   },
+   "workspaces": [
+      "packages/*"
+   ],
+   "peerDependencies": {
+      "typescript": "^5"
+   }
 }

@@ -4,13 +4,11 @@
   "workspaces": {
     "": {
       "name": "habit-tracker-take-home",
-      "dependencies": {
-        "lint-staged": "^17.6.0",
-      },
       "devDependencies": {
         "@types/bun": "latest",
         "concurrently": "^10.0.5",
         "husky": "^9.1.7",
+        "lint-staged": "^17.6.0",
         "prettier": "^3.9.6",
       },
       "peerDependencies": {
