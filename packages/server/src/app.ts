@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { env } from "./config/env";
+import { authRoutes } from "./routes/auth.routes";
 import { errorHandler } from "./middlewares/errorHandler";
 import { NotFoundError } from "./utils/errors";
 
@@ -25,6 +26,9 @@ app.get("/api/health", (_req, res) => {
       env: env.NODE_ENV,
    });
 });
+
+// API Routes
+app.use("/api/auth", authRoutes);
 
 // Catch-all 404 for unmatched routes
 app.use((_req, _res, next) => {
