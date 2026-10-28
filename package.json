@@ -1,23 +1,23 @@
 {
-  "name": "habit-tracker-take-home",
-  "module": "index.ts",
-  "type": "module",
-  "private": true,
-  "scripts": {
-    "dev": "bun run index.ts",
-    "start": "bun index.ts",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
-  },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "concurrently": "^10.0.5",
-    "prettier": "^3.9.6"
-  },
-  "workspaces": [
-    "packages/*"
-  ],
-  "peerDependencies": {
-    "typescript": "^5"
-  }
+   "name": "habit-tracker-take-home",
+   "module": "index.ts",
+   "type": "module",
+   "private": true,
+   "scripts": {
+      "dev": "bun run index.ts",
+      "start": "bun index.ts",
+      "format": "prettier --write .",
+      "format:check": "prettier --check ."
+   },
+   "devDependencies": {
+      "@types/bun": "latest",
+      "concurrently": "^10.0.5",
+      "prettier": "^3.9.6"
+   },
+   "workspaces": [
+      "packages/*"
+   ],
+   "peerDependencies": {
+      "typescript": "^5"
+   }
 }
