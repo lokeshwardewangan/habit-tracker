@@ -1,11 +1,11 @@
 import {
    habitRepository,
    type HabitRepository,
-} from "../repositories/habit.repository";
+} from "../repositories/habit.repository.js";
 import {
    completionRepository,
    type CompletionRepository,
-} from "../repositories/completion.repository";
+} from "../repositories/completion.repository.js";
 
 export interface DashboardStatsResult {
    period: {

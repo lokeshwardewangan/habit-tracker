@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { type ZodSchema, ZodError } from "zod";
-import { ValidationError } from "../utils/errors";
+import { ValidationError } from "../utils/errors.js";
 
 interface ValidationOptions {
    body?: ZodSchema;

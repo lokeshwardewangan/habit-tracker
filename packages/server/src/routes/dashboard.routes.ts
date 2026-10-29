@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { dashboardController } from "../controllers/dashboard.controller";
-import { authenticate } from "../middlewares/auth.middleware";
-import { validate } from "../middlewares/validate";
-import { dashboardStatsQuerySchema } from "../validators/dashboard.validator";
+import { dashboardController } from "../controllers/dashboard.controller.js";
+import { authenticate } from "../middlewares/auth.middleware.js";
+import { validate } from "../middlewares/validate.js";
+import { dashboardStatsQuerySchema } from "../validators/dashboard.validator.js";
 
 const router = Router();
 

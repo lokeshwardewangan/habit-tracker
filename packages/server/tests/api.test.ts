@@ -7,8 +7,8 @@ import {
    beforeEach,
 } from "bun:test";
 import request from "supertest";
-import { app } from "../src/app";
-import { setupTestDB, teardownTestDB, clearTestDB } from "./setup";
+import { app } from "../src/app.js";
+import { setupTestDB, teardownTestDB, clearTestDB } from "./setup.js";
 
 describe("Habit Tracker API Integration Tests", () => {
    let userAToken: string;

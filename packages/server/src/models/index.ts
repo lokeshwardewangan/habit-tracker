@@ -1,3 +1,3 @@
-export * from "./User";
-export * from "./Habit";
-export * from "./Completion";
+export * from "./User.js";
+export * from "./Habit.js";
+export * from "./Completion.js";

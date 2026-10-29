@@ -1,12 +1,12 @@
 import {
    completionRepository,
    type CompletionRepository,
-} from "../repositories/completion.repository";
+} from "../repositories/completion.repository.js";
 import {
    habitRepository,
    type HabitRepository,
-} from "../repositories/habit.repository";
-import { NotFoundError } from "../utils/errors";
+} from "../repositories/habit.repository.js";
+import { NotFoundError } from "../utils/errors.js";
 
 export class CompletionService {
    constructor(

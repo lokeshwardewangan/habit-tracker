@@ -1,12 +1,12 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { env } from "./config/env";
-import { authRoutes } from "./routes/auth.routes";
-import { habitRoutes } from "./routes/habit.routes";
-import { dashboardRoutes } from "./routes/dashboard.routes";
-import { errorHandler } from "./middlewares/errorHandler";
-import { NotFoundError } from "./utils/errors";
+import { env } from "./config/env.js";
+import { authRoutes } from "./routes/auth.routes.js";
+import { habitRoutes } from "./routes/habit.routes.js";
+import { dashboardRoutes } from "./routes/dashboard.routes.js";
+import { errorHandler } from "./middlewares/errorHandler.js";
+import { NotFoundError } from "./utils/errors.js";
 
 const app = express();
 

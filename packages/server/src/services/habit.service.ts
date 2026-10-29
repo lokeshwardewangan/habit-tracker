@@ -1,14 +1,14 @@
 import {
    habitRepository,
    type HabitRepository,
-} from "../repositories/habit.repository";
-import { Completion } from "../models/Completion";
-import { NotFoundError } from "../utils/errors";
+} from "../repositories/habit.repository.js";
+import { Completion } from "../models/Completion.js";
+import { NotFoundError } from "../utils/errors.js";
 import type {
    CreateHabitInput,
    UpdateHabitInput,
-} from "../validators/habit.validator";
-import type { HabitStatus } from "../models/Habit";
+} from "../validators/habit.validator.js";
+import type { HabitStatus } from "../models/Habit.js";
 
 export class HabitService {
    constructor(private habitRepo: HabitRepository = habitRepository) {}

@@ -1,18 +1,18 @@
 import { Router } from "express";
-import { habitController } from "../controllers/habit.controller";
-import { completionController } from "../controllers/completion.controller";
-import { authenticate } from "../middlewares/auth.middleware";
-import { validate } from "../middlewares/validate";
+import { habitController } from "../controllers/habit.controller.js";
+import { completionController } from "../controllers/completion.controller.js";
+import { authenticate } from "../middlewares/auth.middleware.js";
+import { validate } from "../middlewares/validate.js";
 import {
    createHabitSchema,
    updateHabitSchema,
    habitQuerySchema,
    habitIdParamSchema,
-} from "../validators/habit.validator";
+} from "../validators/habit.validator.js";
 import {
    completionParamSchema,
    completionQuerySchema,
-} from "../validators/completion.validator";
+} from "../validators/completion.validator.js";
 
 const router = Router();
 

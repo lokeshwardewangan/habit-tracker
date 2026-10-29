@@ -3,15 +3,15 @@ import jwt from "jsonwebtoken";
 import {
    userRepository,
    type UserRepository,
-} from "../repositories/user.repository";
-import { env } from "../config/env";
+} from "../repositories/user.repository.js";
+import { env } from "../config/env.js";
 import {
    ConflictError,
    UnauthorizedError,
    NotFoundError,
-} from "../utils/errors";
-import type { SignupInput, LoginInput } from "../validators/auth.validator";
-import type { IUserDocument } from "../models/User";
+} from "../utils/errors.js";
+import type { SignupInput, LoginInput } from "../validators/auth.validator.js";
+import type { IUserDocument } from "../models/User.js";
 
 export interface AuthResult {
    user: {

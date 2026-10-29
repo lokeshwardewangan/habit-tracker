@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { Completion, type ICompletionDocument } from "../models/Completion";
+import { Completion, type ICompletionDocument } from "../models/Completion.js";
 
 export class CompletionRepository {
    async upsert(

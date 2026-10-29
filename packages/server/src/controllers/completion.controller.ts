@@ -2,9 +2,9 @@ import type { Request, Response, NextFunction } from "express";
 import {
    completionService,
    type CompletionService,
-} from "../services/completion.service";
-import { sendSuccess } from "../utils/response";
-import { UnauthorizedError } from "../utils/errors";
+} from "../services/completion.service.js";
+import { sendSuccess } from "../utils/response.js";
+import { UnauthorizedError } from "../utils/errors.js";
 
 export class CompletionController {
    constructor(private service: CompletionService = completionService) {}

@@ -1,4 +1,4 @@
-import { User, type IUserDocument } from "../models/User";
+import { User, type IUserDocument } from "../models/User.js";
 
 export class UserRepository {
    async findByEmail(

@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
-import { habitService, type HabitService } from "../services/habit.service";
-import { sendSuccess } from "../utils/response";
-import { UnauthorizedError } from "../utils/errors";
+import { habitService, type HabitService } from "../services/habit.service.js";
+import { sendSuccess } from "../utils/response.js";
+import { UnauthorizedError } from "../utils/errors.js";
 
 export class HabitController {
    constructor(private service: HabitService = habitService) {}

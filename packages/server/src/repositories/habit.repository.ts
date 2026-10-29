@@ -4,7 +4,7 @@ import {
    type IHabitDocument,
    type HabitStatus,
    type HabitFrequency,
-} from "../models/Habit";
+} from "../models/Habit.js";
 
 export interface CreateHabitDTO {
    userId: string;

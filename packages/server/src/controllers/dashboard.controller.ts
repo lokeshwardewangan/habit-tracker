@@ -2,9 +2,9 @@ import type { Request, Response, NextFunction } from "express";
 import {
    dashboardService,
    type DashboardService,
-} from "../services/dashboard.service";
-import { sendSuccess } from "../utils/response";
-import { UnauthorizedError } from "../utils/errors";
+} from "../services/dashboard.service.js";
+import { sendSuccess } from "../utils/response.js";
+import { UnauthorizedError } from "../utils/errors.js";
 
 export class DashboardController {
    constructor(private service: DashboardService = dashboardService) {}

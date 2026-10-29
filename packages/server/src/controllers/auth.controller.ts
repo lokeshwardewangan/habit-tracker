@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
-import { authService, type AuthService } from "../services/auth.service";
-import { sendSuccess } from "../utils/response";
-import { UnauthorizedError } from "../utils/errors";
-import { env } from "../config/env";
+import { authService, type AuthService } from "../services/auth.service.js";
+import { sendSuccess } from "../utils/response.js";
+import { UnauthorizedError } from "../utils/errors.js";
+import { env } from "../config/env.js";
 
 const COOKIE_NAME = "token";
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
