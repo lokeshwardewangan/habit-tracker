@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { habitController } from "../controllers/habit.controller";
+import { completionController } from "../controllers/completion.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validate";
 import {
@@ -8,6 +9,10 @@ import {
    habitQuerySchema,
    habitIdParamSchema,
 } from "../validators/habit.validator";
+import {
+   completionParamSchema,
+   completionQuerySchema,
+} from "../validators/completion.validator";
 
 const router = Router();
 
@@ -42,6 +47,23 @@ router.post(
    "/:id/unarchive",
    validate({ params: habitIdParamSchema }),
    habitController.unarchive,
+);
+
+// Completion routes
+router.get(
+   "/:id/completions",
+   validate({ params: habitIdParamSchema, query: completionQuerySchema }),
+   completionController.listCompletions,
+);
+router.put(
+   "/:id/completions/:date",
+   validate({ params: completionParamSchema }),
+   completionController.markComplete,
+);
+router.delete(
+   "/:id/completions/:date",
+   validate({ params: completionParamSchema }),
+   completionController.undoComplete,
 );
 
 export { router as habitRoutes };
