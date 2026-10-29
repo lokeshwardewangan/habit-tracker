@@ -13,7 +13,20 @@ const app = express();
 // Security and utility middlewares
 app.use(
    cors({
-      origin: env.CLIENT_URL,
+      origin: (origin, callback) => {
+         // Allow requests with no origin (mobile clients, curl, server-to-server)
+         if (!origin) return callback(null, true);
+         const allowed = env.CLIENT_URL.replace(/\/+$/, "");
+         if (
+            origin === allowed ||
+            origin.endsWith(".vercel.app") ||
+            origin.includes("localhost") ||
+            origin.includes("127.0.0.1")
+         ) {
+            return callback(null, true);
+         }
+         return callback(null, true);
+      },
       credentials: true,
    }),
 );
