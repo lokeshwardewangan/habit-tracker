@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { env } from "./config/env";
 import { authRoutes } from "./routes/auth.routes";
+import { habitRoutes } from "./routes/habit.routes";
 import { errorHandler } from "./middlewares/errorHandler";
 import { NotFoundError } from "./utils/errors";
 
@@ -29,6 +30,7 @@ app.get("/api/health", (_req, res) => {
 
 // API Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/habits", habitRoutes);
 
 // Catch-all 404 for unmatched routes
 app.use((_req, _res, next) => {
