@@ -53,7 +53,7 @@ export const Sidebar = ({
             <div className="flex h-20 items-center justify-between px-6">
                <Link to="/home" className="flex items-center gap-2">
                   <span className="text-2xl font-black tracking-tight text-primary">
-                     MyWebsite
+                     HabitPulse
                   </span>
                </Link>
                {onClose && (

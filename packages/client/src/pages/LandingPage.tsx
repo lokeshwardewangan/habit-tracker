@@ -54,7 +54,7 @@ export const LandingPage = () => {
                      <Check className="h-4 w-4 stroke-[3]" />
                   </div>
                   <span className="text-lg font-black tracking-tight text-foreground">
-                     HabitFlow
+                     HabitPulse
                   </span>
                </Link>
 

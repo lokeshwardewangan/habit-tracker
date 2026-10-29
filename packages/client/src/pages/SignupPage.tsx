@@ -64,7 +64,7 @@ export const SignupPage = () => {
                   to="/"
                   className="text-xl font-black tracking-tight text-primary"
                >
-                  MyWebsite
+                  HabitPulse
                </Link>
             </div>
 

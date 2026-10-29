@@ -3,6 +3,7 @@ import {
    Tag,
    Archive as ArchiveIcon,
    Trash2,
+   Timer,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
@@ -10,6 +11,11 @@ export const NAV_ITEMS = [
       name: "Home",
       path: "/home",
       icon: HomeIcon,
+   },
+   {
+      name: "Focus Timer",
+      path: "/timer",
+      icon: Timer,
    },
    {
       name: "Labels",

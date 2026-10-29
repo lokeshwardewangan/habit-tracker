@@ -9,11 +9,14 @@ import {
    Search,
    Sparkles,
    Loader2,
+   Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HabitCard } from "@/components/habits/HabitCard";
 import { NewHabitModal } from "@/components/habits/NewHabitModal";
 import { CalendarHistoryModal } from "@/components/habits/CalendarHistoryModal";
+import { WeeklyConsistencyChart } from "@/features/dashboard";
+import { exportHabitsToCsv } from "@/features/habits/utils/exportCsv";
 import type { HabitItem } from "@/types/habit";
 import type { Habit } from "@/types/api";
 import { format } from "date-fns";
@@ -187,11 +190,25 @@ export const HomePage = () => {
                </p>
             </div>
 
-            {/* Quick action button */}
-            <div className="flex items-center gap-3 shrink-0">
+            {/* Quick action buttons */}
+            <div className="flex items-center gap-2.5 shrink-0">
+               <Button
+                  variant="outline"
+                  onClick={() => {
+                     exportHabitsToCsv(serverHabits);
+                     toast.success("Habits exported to CSV!");
+                  }}
+                  disabled={serverHabits.length === 0}
+                  className="h-11 px-4 rounded-xl border-border font-semibold text-xs flex items-center gap-2 cursor-pointer hover:bg-accent"
+                  title="Export all habits data to CSV"
+               >
+                  <Download className="h-4 w-4" />
+                  <span className="hidden sm:inline">Export CSV</span>
+               </Button>
+
                <Button
                   onClick={() => setIsModalOpen(true)}
-                  className="h-11 px-6 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-xs text-sm flex items-center gap-2 cursor-pointer"
+                  className="h-11 px-5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-xs text-sm flex items-center gap-2 cursor-pointer"
                >
                   <Plus className="h-4 w-4 stroke-[3]" />
                   <span>Create Habit</span>
@@ -256,6 +273,12 @@ export const HomePage = () => {
                </div>
             </div>
          </div>
+
+         {/* 7-Day Consistency Analytics Chart (Recharts) */}
+         <WeeklyConsistencyChart
+            stats={stats}
+            completedTodayCount={completedList.length}
+         />
 
          {/* Habits Workspace Section */}
          <div className="space-y-4">

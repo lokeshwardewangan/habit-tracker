@@ -15,6 +15,7 @@ import { LabelsPage } from "./pages/LabelsPage";
 import { ArchivePage } from "./pages/ArchivePage";
 import { TrashPage } from "./pages/TrashPage";
 import { ProfilePage } from "./pages/ProfilePage";
+import { ActionPage } from "./pages/ActionPage";
 
 function App() {
    return (
@@ -50,6 +51,11 @@ function App() {
                         element={<HabitEditPage />}
                      />
                      <Route path="/labels" element={<LabelsPage />} />
+                     <Route path="/timer" element={<ActionPage />} />
+                     <Route
+                        path="/action"
+                        element={<Navigate to="/timer" replace />}
+                     />
                      <Route path="/archive" element={<ArchivePage />} />
                      <Route path="/trash" element={<TrashPage />} />
                      <Route path="/profile" element={<ProfilePage />} />
