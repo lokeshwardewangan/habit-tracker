@@ -2,37 +2,13 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { toast } from "sonner";
 import { Eye, EyeOff, Loader2, AlertCircle, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-const signupSchema = z.object({
-   firstName: z
-      .string()
-      .trim()
-      .min(1, "First name is required")
-      .max(50, "First name must not exceed 50 characters"),
-   lastName: z
-      .string()
-      .trim()
-      .min(1, "Last name is required")
-      .max(50, "Last name must not exceed 50 characters"),
-   email: z
-      .string()
-      .trim()
-      .min(1, "Email is required")
-      .email("Please enter a valid email address"),
-   password: z
-      .string()
-      .min(6, "Password must be at least 6 characters")
-      .max(128, "Password must not exceed 128 characters"),
-});
-
-type SignupFormValues = z.infer<typeof signupSchema>;
+import { signupSchema, type SignupFormValues } from "@/schemas/auth.schema";
 
 export const SignupPage = () => {
    const { signup } = useAuth();

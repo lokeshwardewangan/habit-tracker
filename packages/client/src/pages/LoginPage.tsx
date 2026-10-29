@@ -2,24 +2,13 @@ import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { toast } from "sonner";
 import { Eye, EyeOff, Loader2, AlertCircle, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-const loginSchema = z.object({
-   email: z
-      .string()
-      .trim()
-      .min(1, "Email is required")
-      .email("Please enter a valid email address"),
-   password: z.string().min(1, "Password is required"),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
+import { loginSchema, type LoginFormValues } from "@/schemas/auth.schema";
 
 export const LoginPage = () => {
    const { login, signup } = useAuth();

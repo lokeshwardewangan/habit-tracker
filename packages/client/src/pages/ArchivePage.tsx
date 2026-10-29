@@ -2,10 +2,9 @@ import { useState, useMemo } from "react";
 import { Archive as ArchiveIcon, Loader2, Sparkles } from "lucide-react";
 import { TopSearchHeader } from "@/components/layout/TopSearchHeader";
 import { HabitCard } from "@/components/habits/HabitCard";
-import type { HabitItem, HabitColor } from "@/types/habit";
+import type { HabitItem } from "@/types/habit";
 import { useHabits, useUnarchiveHabit } from "@/hooks/useHabits";
-
-const PASTEL_COLORS: HabitColor[] = ["blue", "rose", "amber", "mint"];
+import { PASTEL_COLORS } from "@/constants/habits";
 
 export const ArchivePage = () => {
    const [searchQuery, setSearchQuery] = useState("");

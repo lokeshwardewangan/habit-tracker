@@ -1,16 +1,9 @@
 import { NavLink, Link, useNavigate } from "react-router-dom";
-import {
-   Home as HomeIcon,
-   Tag,
-   Archive as ArchiveIcon,
-   Trash2,
-   Plus,
-   LogOut,
-   X,
-} from "lucide-react";
+import { Plus, LogOut, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import { NAV_ITEMS } from "@/constants/navigation";
 
 interface SidebarProps {
    isOpen?: boolean;
@@ -39,28 +32,7 @@ export const Sidebar = ({
       toast.success("Signed out successfully");
       navigate("/login");
    };
-   const navItems = [
-      {
-         name: "Home",
-         path: "/home",
-         icon: HomeIcon,
-      },
-      {
-         name: "Labels",
-         path: "/labels",
-         icon: Tag,
-      },
-      {
-         name: "Archive",
-         path: "/archive",
-         icon: ArchiveIcon,
-      },
-      {
-         name: "Trash",
-         path: "/trash",
-         icon: Trash2,
-      },
-   ];
+   const navItems = NAV_ITEMS;
 
    return (
       <>

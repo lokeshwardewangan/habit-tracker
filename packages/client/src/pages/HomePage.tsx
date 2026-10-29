@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { HabitCard } from "@/components/habits/HabitCard";
 import { NewHabitModal } from "@/components/habits/NewHabitModal";
 import { CalendarHistoryModal } from "@/components/habits/CalendarHistoryModal";
-import type { HabitItem, HabitColor } from "@/types/habit";
+import type { HabitItem } from "@/types/habit";
 import type { Habit } from "@/types/api";
 import { format } from "date-fns";
 import { useAuth } from "@/context/AuthContext";
@@ -26,8 +26,7 @@ import {
    useArchiveHabit,
 } from "@/hooks/useHabits";
 import { toast } from "sonner";
-
-const PASTEL_COLORS: HabitColor[] = ["blue", "rose", "amber", "mint"];
+import { PASTEL_COLORS, STARTER_HABITS } from "@/constants/habits";
 
 export const HomePage = () => {
    const { user } = useAuth();
@@ -131,15 +130,8 @@ export const HomePage = () => {
 
    // Seed Starter Habits directly into MongoDB
    const handleSeedStarterHabits = async () => {
-      const starterList = [
-         { name: "Morning Run (5km)", frequency: "DAILY" as const },
-         { name: "Deep Work (2 Hours)", frequency: "DAILY" as const },
-         { name: "Read 20 Pages", frequency: "DAILY" as const },
-         { name: "Drink 2L Water", frequency: "DAILY" as const },
-      ];
-
       try {
-         for (const item of starterList) {
+         for (const item of STARTER_HABITS) {
             await createHabit.mutateAsync({
                name: item.name,
                startDate: todayDateStr,
