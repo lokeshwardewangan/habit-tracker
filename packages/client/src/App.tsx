@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import { queryClient } from "./lib/queryClient";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { PublicRoute } from "./components/auth/PublicRoute";
 import { AppLayout } from "./components/layout/AppLayout";
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -23,10 +24,24 @@ function App() {
          <AuthProvider>
             <BrowserRouter>
                <Routes>
-                  {/* Public Standalone Pages */}
+                  {/* Public Standalone Pages (Reverse protected so authenticated users are redirected to /home) */}
                   <Route path="/" element={<LandingPage />} />
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/signup" element={<SignupPage />} />
+                  <Route
+                     path="/login"
+                     element={
+                        <PublicRoute>
+                           <LoginPage />
+                        </PublicRoute>
+                     }
+                  />
+                  <Route
+                     path="/signup"
+                     element={
+                        <PublicRoute>
+                           <SignupPage />
+                        </PublicRoute>
+                     }
+                  />
 
                   {/* Authenticated Application Shell Protected by Route Guard */}
                   <Route
