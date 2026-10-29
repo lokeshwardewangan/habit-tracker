@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Archive as ArchiveIcon, Loader2, Sparkles } from "lucide-react";
+import { Archive as ArchiveIcon, Loader2 } from "lucide-react";
 import { TopSearchHeader } from "@/components/layout/TopSearchHeader";
 import { HabitCard } from "@/components/habits/HabitCard";
 import type { HabitItem } from "@/types/habit";
@@ -85,7 +85,7 @@ export const ArchivePage = () => {
          ) : (
             <div className="rounded-3xl border border-dashed border-border p-12 text-center space-y-3 bg-card/40">
                <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mx-auto">
-                  <Sparkles className="h-5 w-5" />
+                  <ArchiveIcon className="h-5 w-5" />
                </div>
                <p className="text-sm font-bold text-foreground">
                   No archived habits

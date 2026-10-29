@@ -4,7 +4,7 @@ import {
    Pause,
    RotateCcw,
    Timer,
-   Sparkles,
+   Zap,
    Coffee,
    CheckCircle2,
 } from "lucide-react";
@@ -82,7 +82,7 @@ export const ActionPage = () => {
             </div>
 
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold">
-               <Sparkles className="h-3.5 w-3.5" />
+               <Zap className="h-3.5 w-3.5 fill-current" />
                <span>{sessionsCompleted} sessions done</span>
             </div>
          </div>

@@ -7,7 +7,7 @@ import {
    CheckCircle2,
    TrendingUp,
    Search,
-   Sparkles,
+   Target,
    Loader2,
    Download,
 } from "lucide-react";
@@ -360,7 +360,7 @@ export const HomePage = () => {
                /* Empty State */
                <div className="rounded-3xl border border-dashed border-border p-12 text-center space-y-4 bg-card/40">
                   <div className="h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto">
-                     <Sparkles className="h-6 w-6" />
+                     <Target className="h-6 w-6" />
                   </div>
                   <div className="space-y-1 max-w-sm mx-auto">
                      <h3 className="text-base font-bold text-foreground">

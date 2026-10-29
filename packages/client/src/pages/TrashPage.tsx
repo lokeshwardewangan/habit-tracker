@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trash2, Sparkles } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { TopSearchHeader } from "@/components/layout/TopSearchHeader";
 import { HabitCard } from "@/components/habits/HabitCard";
 import { initialHabits } from "@/mock/staticData";
@@ -65,7 +65,7 @@ export const TrashPage = () => {
          ) : (
             <div className="rounded-3xl border border-dashed border-border p-12 text-center space-y-3 bg-card/40">
                <div className="h-10 w-10 rounded-xl bg-muted text-muted-foreground flex items-center justify-center mx-auto">
-                  <Sparkles className="h-5 w-5" />
+                  <Trash2 className="h-5 w-5" />
                </div>
                <p className="text-sm font-bold text-foreground">
                   Trash is clean & empty
