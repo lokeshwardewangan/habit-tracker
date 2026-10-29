@@ -1,89 +1,61 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import {
-   Sparkles,
-   ArrowRight,
-   TrendingUp,
-   Calendar as CalendarIcon,
-   ShieldCheck,
-   Flame,
-   Check,
-} from "lucide-react";
+import { Check, ArrowRight, Flame } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
-import {
-   Card,
-   CardHeader,
-   CardTitle,
-   CardDescription,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-interface DemoHabit {
-   id: string;
-   name: string;
-   streak: number;
-   completed: boolean;
-}
-
-const CURRENT_YEAR = new Date().getFullYear();
-
 export const LandingPage = () => {
-   const [demoHabits, setDemoHabits] = useState<DemoHabit[]>([
+   const [demoHabits, setDemoHabits] = useState([
       {
          id: "1",
-         name: "Morning Meditation (15 min)",
-         streak: 12,
+         title: "Morning walk & sunlight (20 mins)",
+         streak: 14,
          completed: true,
+         tag: "Health",
       },
       {
          id: "2",
-         name: "Read 20 pages of nonfiction",
-         streak: 7,
-         completed: false,
+         title: "Read 15 pages of nonfiction",
+         streak: 6,
+         completed: true,
+         tag: "Learning",
       },
-      { id: "3", name: "Drink 2.5L of water", streak: 19, completed: true },
+      {
+         id: "3",
+         title: "Drink 2.5L water",
+         streak: 21,
+         completed: false,
+         tag: "Health",
+      },
+      {
+         id: "4",
+         title: "Review tomorrow's priorities",
+         streak: 4,
+         completed: false,
+         tag: "Focus",
+      },
    ]);
 
-   const toggleDemoHabit = (id: string) => {
+   const toggleDemo = (id: string) => {
       setDemoHabits((prev) =>
-         prev.map((h) =>
-            h.id === id
-               ? {
-                    ...h,
-                    completed: !h.completed,
-                    streak: !h.completed
-                       ? h.streak + 1
-                       : Math.max(0, h.streak - 1),
-                 }
-               : h,
-         ),
+         prev.map((h) => (h.id === id ? { ...h, completed: !h.completed } : h)),
       );
    };
 
    const completedCount = demoHabits.filter((h) => h.completed).length;
-   const completionPercent = Math.round(
-      (completedCount / demoHabits.length) * 100,
-   );
 
    return (
-      <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-primary selection:text-primary-foreground">
-         {/* Navigation Header */}
-         <header className="sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur-md">
-            <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6 md:px-8">
-               <Link
-                  to="/"
-                  className="flex items-center gap-2.5 font-bold tracking-tight"
-               >
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs">
-                     <Sparkles className="h-5 w-5" />
+      <div className="min-h-screen bg-background text-foreground flex flex-col font-sans selection:bg-primary/20">
+         {/* Simple, Clean Navbar */}
+         <header className="border-b border-border/80 bg-background/90 backdrop-blur-xs sticky top-0 z-30">
+            <div className="max-w-5xl mx-auto h-16 px-6 flex items-center justify-between">
+               <Link to="/" className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shadow-xs">
+                     <Check className="h-4 w-4 stroke-[3]" />
                   </div>
-                  <div className="flex flex-col">
-                     <span className="text-base font-bold">HabitFlow</span>
-                     <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-mono">
-                        Tracker
-                     </span>
-                  </div>
+                  <span className="text-lg font-black tracking-tight text-foreground">
+                     HabitFlow
+                  </span>
                </Link>
 
                <div className="flex items-center gap-3">
@@ -91,14 +63,16 @@ export const LandingPage = () => {
                      to="/login"
                      className={cn(
                         buttonVariants({ variant: "ghost", size: "sm" }),
+                        "text-sm font-semibold",
                      )}
                   >
-                     Sign In
+                     Sign in
                   </Link>
                   <Link
                      to="/signup"
                      className={cn(
                         buttonVariants({ variant: "default", size: "sm" }),
+                        "rounded-xl px-4 font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs text-sm",
                      )}
                   >
                      Get Started
@@ -107,241 +81,153 @@ export const LandingPage = () => {
             </div>
          </header>
 
-         {/* Hero Section */}
-         <main className="flex-1">
-            <section className="relative overflow-hidden pt-12 pb-20 md:pt-20 md:pb-32">
-               <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 flex flex-col items-center text-center space-y-8">
-                  {/* Tagline Badge */}
-                  <Badge
-                     variant="outline"
-                     className="px-3.5 py-1 text-xs gap-1.5 shadow-2xs"
-                  >
-                     <Sparkles className="h-3.5 w-3.5 text-primary" />
-                     <span>
-                        Engineered for Consistency & Measurable Progress
-                     </span>
-                  </Badge>
-
-                  {/* Main Headline */}
-                  <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight max-w-4xl leading-[1.15]">
-                     Transform daily intentions into{" "}
-                     <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                        lifelong momentum
-                     </span>
-                     .
-                  </h1>
-
-                  {/* Subhead */}
-                  <p className="max-w-2xl text-base sm:text-lg text-muted-foreground leading-relaxed">
-                     A clean, distraction-free habit workspace. Track daily
-                     routines, review calendar month histories, and monitor
-                     dynamically calculated completion rates with zero fluff.
-                  </p>
-
-                  {/* CTAs */}
-                  <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-                     <Link
-                        to="/signup"
-                        className={cn(
-                           buttonVariants({ variant: "default", size: "lg" }),
-                           "w-full sm:w-auto gap-2 text-base px-6 shadow-xs",
-                        )}
-                     >
-                        <span>Start Tracking Free</span>
-                        <ArrowRight className="h-4 w-4" />
-                     </Link>
-                     <Link
-                        to="/login"
-                        className={cn(
-                           buttonVariants({ variant: "outline", size: "lg" }),
-                           "w-full sm:w-auto text-base px-6",
-                        )}
-                     >
-                        Sign In to Your Workspace
-                     </Link>
-                  </div>
-
-                  {/* Interactive Hero Teaser Card */}
-                  <div className="w-full max-w-xl pt-8">
-                     <div className="rounded-2xl border border-border bg-card p-6 shadow-md text-left space-y-5">
-                        <div className="flex items-center justify-between pb-3 border-b border-border">
-                           <div>
-                              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                                 Interactive Live Preview
-                              </div>
-                              <div className="text-base font-bold text-foreground">
-                                 Today's Habits
-                              </div>
-                           </div>
-                           <div className="text-right">
-                              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                                 {completionPercent}% completed
-                              </span>
-                              <div className="w-24 h-2 bg-muted rounded-full overflow-hidden mt-1">
-                                 <div
-                                    className="h-full bg-emerald-500 transition-all duration-300 rounded-full"
-                                    style={{ width: `${completionPercent}%` }}
-                                 />
-                              </div>
-                           </div>
-                        </div>
-
-                        {/* Interactive Habit List */}
-                        <div className="space-y-2.5">
-                           {demoHabits.map((habit) => (
-                              <div
-                                 key={habit.id}
-                                 onClick={() => toggleDemoHabit(habit.id)}
-                                 className={cn(
-                                    "flex items-center justify-between p-3.5 rounded-xl border transition-all cursor-pointer select-none",
-                                    habit.completed
-                                       ? "border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-500/10"
-                                       : "border-border bg-background hover:border-zinc-300 dark:hover:border-zinc-700",
-                                 )}
-                              >
-                                 <div className="flex items-center gap-3">
-                                    <div
-                                       className={cn(
-                                          "flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border transition-colors",
-                                          habit.completed
-                                             ? "bg-emerald-500 border-emerald-500 text-white"
-                                             : "border-input bg-transparent",
-                                       )}
-                                    >
-                                       {habit.completed && (
-                                          <Check className="h-4 w-4 stroke-[3]" />
-                                       )}
-                                    </div>
-                                    <span
-                                       className={cn(
-                                          "text-sm font-medium",
-                                          habit.completed
-                                             ? "line-through text-muted-foreground"
-                                             : "text-foreground",
-                                       )}
-                                    >
-                                       {habit.name}
-                                    </span>
-                                 </div>
-
-                                 <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-500 bg-amber-500/10 px-2.5 py-1 rounded-md">
-                                    <Flame className="h-3.5 w-3.5 fill-amber-500" />
-                                    <span>{habit.streak}d streak</span>
-                                 </div>
-                              </div>
-                           ))}
-                        </div>
-
-                        <div className="text-center pt-2">
-                           <span className="text-xs text-muted-foreground">
-                              💡 Click habits above to test the instant checkoff
-                              interaction.
-                           </span>
-                        </div>
-                     </div>
-                  </div>
+         {/* Human-made Hero Section */}
+         <main className="flex-1 flex flex-col items-center justify-center px-6 py-16 md:py-24">
+            <div className="max-w-3xl mx-auto text-center space-y-6">
+               {/* Minimal badge */}
+               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-card text-xs font-semibold text-muted-foreground shadow-2xs">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Simple daily habit tracking</span>
                </div>
-            </section>
 
-            {/* Features Grid */}
-            <section className="border-t border-border bg-muted/30 py-20">
-               <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 space-y-12">
-                  <div className="text-center space-y-3">
-                     <h2 className="text-3xl font-bold tracking-tight">
-                        Built on rigorous full-stack principles
-                     </h2>
-                     <p className="max-w-xl mx-auto text-muted-foreground text-sm">
-                        Everything you need to build steady routines, without
-                        the clutter of social networks or unnecessary upsells.
-                     </p>
-                  </div>
+               {/* Headline: Clean, human, punchy */}
+               <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-foreground leading-[1.12]">
+                  Small daily habits. <br />
+                  <span className="text-primary">Measurable progress.</span>
+               </h1>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                     <Card>
-                        <CardHeader>
-                           <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-2">
-                              <TrendingUp className="h-5 w-5" />
-                           </div>
-                           <CardTitle>Dynamic Statistics</CardTitle>
-                           <CardDescription>
-                              Calculations derived directly from real database
-                              checkoffs. Completion rates reflect active habit
-                              start dates without arbitrary hardcoded figures.
-                           </CardDescription>
-                        </CardHeader>
-                     </Card>
+               {/* Subtitle */}
+               <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
+                  No gamified clutter or complex setup. Just a fast,
+                  distraction-free space to build daily routines and keep your
+                  streaks alive.
+               </p>
 
-                     <Card>
-                        <CardHeader>
-                           <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-2">
-                              <CalendarIcon className="h-5 w-5" />
-                           </div>
-                           <CardTitle>Calendar Month History</CardTitle>
-                           <CardDescription>
-                              Clear visual month grids in strict calendar date
-                              format (
-                              <code className="text-xs font-mono">
-                                 YYYY-MM-DD
-                              </code>
-                              ). Click any past date to toggle completion or
-                              undo.
-                           </CardDescription>
-                        </CardHeader>
-                     </Card>
-
-                     <Card>
-                        <CardHeader>
-                           <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-2">
-                              <ShieldCheck className="h-5 w-5" />
-                           </div>
-                           <CardTitle>Tenant Isolation & Privacy</CardTitle>
-                           <CardDescription>
-                              Strict server-side data ownership enforcement.
-                              Passwords are never stored in plain text, and ID
-                              tampering attempts are safely blocked.
-                           </CardDescription>
-                        </CardHeader>
-                     </Card>
-                  </div>
-               </div>
-            </section>
-
-            {/* Call to Action Banner */}
-            <section className="py-20 border-t border-border">
-               <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 text-center space-y-6">
-                  <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                     Ready to build consistency that lasts?
-                  </h2>
-                  <p className="text-muted-foreground max-w-lg mx-auto text-sm sm:text-base">
-                     Sign up in seconds, configure your first routine, and track
-                     your daily progress with confidence.
-                  </p>
+               {/* CTA Buttons */}
+               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
                   <Link
                      to="/signup"
                      className={cn(
                         buttonVariants({ variant: "default", size: "lg" }),
-                        "gap-2 px-8 shadow-xs",
+                        "w-full sm:w-auto h-12 px-7 rounded-xl font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm flex items-center justify-center gap-2 text-sm transition-all hover:scale-[1.02]",
                      )}
                   >
-                     <span>Get Started Now</span>
+                     <span>Start tracking free</span>
                      <ArrowRight className="h-4 w-4" />
                   </Link>
+                  <Link
+                     to="/home"
+                     className={cn(
+                        buttonVariants({ variant: "outline", size: "lg" }),
+                        "w-full sm:w-auto h-12 px-6 rounded-xl font-semibold border-border bg-card hover:bg-accent text-sm",
+                     )}
+                  >
+                     View live demo
+                  </Link>
                </div>
-            </section>
+            </div>
+
+            {/* Clean App Preview Mockup Window (Human, not AI template) */}
+            <div className="w-full max-w-2xl mt-14">
+               <div className="rounded-2xl border border-border bg-card shadow-lg overflow-hidden text-left">
+                  {/* Window Bar */}
+                  <div className="h-10 px-4 bg-muted/40 border-b border-border flex items-center justify-between">
+                     <div className="flex items-center gap-1.5">
+                        <div className="h-2.5 w-2.5 rounded-full bg-rose-400/80" />
+                        <div className="h-2.5 w-2.5 rounded-full bg-amber-400/80" />
+                        <div className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
+                     </div>
+                     <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+                        Today's Focus • {completedCount}/{demoHabits.length}{" "}
+                        Done
+                     </span>
+                     <div className="w-8" />
+                  </div>
+
+                  {/* Habit List */}
+                  <div className="p-4 sm:p-5 space-y-2.5 bg-background/50">
+                     {demoHabits.map((habit) => (
+                        <div
+                           key={habit.id}
+                           onClick={() => toggleDemo(habit.id)}
+                           className={cn(
+                              "flex items-center justify-between p-3.5 rounded-xl border transition-all cursor-pointer select-none",
+                              habit.completed
+                                 ? "bg-emerald-500/5 border-emerald-500/20 text-foreground"
+                                 : "bg-card border-border hover:border-border/80 hover:bg-accent/40",
+                           )}
+                        >
+                           <div className="flex items-center gap-3 min-w-0">
+                              <div
+                                 className={cn(
+                                    "h-6 w-6 rounded-lg border flex items-center justify-center transition-colors shrink-0",
+                                    habit.completed
+                                       ? "bg-emerald-500 border-emerald-500 text-white"
+                                       : "border-input bg-transparent",
+                                 )}
+                              >
+                                 {habit.completed && (
+                                    <Check className="h-3.5 w-3.5 stroke-[3]" />
+                                 )}
+                              </div>
+                              <span
+                                 className={cn(
+                                    "text-sm font-semibold truncate",
+                                    habit.completed
+                                       ? "line-through text-muted-foreground"
+                                       : "text-foreground",
+                                 )}
+                              >
+                                 {habit.title}
+                              </span>
+                           </div>
+
+                           <div className="flex items-center gap-2 shrink-0 pl-2">
+                              <span className="hidden sm:inline text-[11px] font-semibold px-2 py-0.5 rounded-md bg-muted text-muted-foreground">
+                                 {habit.tag}
+                              </span>
+                              <span className="flex items-center gap-1 text-xs font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-md">
+                                 <Flame className="h-3 w-3 fill-amber-500" />
+                                 <span>{habit.streak}d</span>
+                              </span>
+                           </div>
+                        </div>
+                     ))}
+                  </div>
+
+                  {/* Bottom helper */}
+                  <div className="px-4 py-2.5 bg-muted/20 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+                     <span>Click any habit to test the instant checkoff</span>
+                     <span className="font-semibold text-primary">
+                        Saved locally
+                     </span>
+                  </div>
+               </div>
+            </div>
          </main>
 
-         {/* Footer */}
-         <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">
-            <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-               <div>
-                  © {CURRENT_YEAR} HabitFlow. Take-Home Developer Assignment.
-               </div>
+         {/* Minimal Footer */}
+         <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
+            <div className="max-w-5xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+               <div>Built with React, TypeScript & Tailwind CSS</div>
                <div className="flex gap-4">
-                  <Link to="/login" className="hover:underline">
-                     Sign In
+                  <Link
+                     to="/home"
+                     className="hover:text-foreground transition-colors"
+                  >
+                     Open App
                   </Link>
-                  <Link to="/signup" className="hover:underline">
-                     Sign Up
+                  <Link
+                     to="/login"
+                     className="hover:text-foreground transition-colors"
+                  >
+                     Sign in
+                  </Link>
+                  <Link
+                     to="/signup"
+                     className="hover:text-foreground transition-colors"
+                  >
+                     Sign up
                   </Link>
                </div>
             </div>

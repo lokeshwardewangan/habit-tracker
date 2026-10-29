@@ -1,56 +1,46 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import {
-   LayoutDashboard,
-   CheckSquare,
-   Archive,
-   User,
-   Timer,
+   Home as HomeIcon,
    Tag,
-   Sparkles,
+   Archive as ArchiveIcon,
+   Trash2,
+   Plus,
+   LogOut,
    X,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface SidebarProps {
    isOpen?: boolean;
    onClose?: () => void;
+   onOpenCreateModal: () => void;
 }
 
-export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
-   const mainNavItems = [
+export const Sidebar = ({
+   isOpen,
+   onClose,
+   onOpenCreateModal,
+}: SidebarProps) => {
+   const navItems = [
       {
-         name: "Dashboard",
-         path: "/dashboard",
-         icon: LayoutDashboard,
-      },
-      {
-         name: "My Habits",
-         path: "/habits",
-         icon: CheckSquare,
-      },
-      {
-         name: "Archive",
-         path: "/archive",
-         icon: Archive,
-      },
-      {
-         name: "Profile",
-         path: "/profile",
-         icon: User,
-      },
-   ];
-
-   const figmaExtraItems = [
-      {
-         name: "Focus Timer",
-         path: "/action",
-         icon: Timer,
-         badge: "P1",
+         name: "Home",
+         path: "/home",
+         icon: HomeIcon,
       },
       {
          name: "Labels",
          path: "/labels",
          icon: Tag,
-         badge: "P1",
+      },
+      {
+         name: "Archive",
+         path: "/archive",
+         icon: ArchiveIcon,
+      },
+      {
+         name: "Trash",
+         path: "/trash",
+         icon: Trash2,
       },
    ];
 
@@ -69,28 +59,17 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                isOpen ? "translate-x-0" : "-translate-x-full"
             }`}
          >
-            {/* Brand Logo Header */}
-            <div className="flex h-16 items-center justify-between px-6 border-b border-sidebar-border">
-               <NavLink
-                  to="/dashboard"
-                  className="flex items-center gap-2.5 font-semibold text-sidebar-foreground"
-               >
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs">
-                     <Sparkles className="h-5 w-5" />
-                  </div>
-                  <div className="flex flex-col">
-                     <span className="text-base font-bold tracking-tight">
-                        HabitFlow
-                     </span>
-                     <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-mono">
-                        Tracker
-                     </span>
-                  </div>
-               </NavLink>
+            {/* Top Logo / Brand */}
+            <div className="flex h-20 items-center justify-between px-6">
+               <Link to="/home" className="flex items-center gap-2">
+                  <span className="text-2xl font-black tracking-tight text-primary">
+                     MyWebsite
+                  </span>
+               </Link>
                {onClose && (
                   <button
                      onClick={onClose}
-                     className="rounded-lg p-1.5 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground md:hidden"
+                     className="rounded-lg p-1.5 text-muted-foreground hover:bg-sidebar-accent md:hidden"
                      aria-label="Close menu"
                   >
                      <X className="h-5 w-5" />
@@ -98,73 +77,67 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                )}
             </div>
 
-            {/* Navigation Links */}
-            <div className="flex-1 overflow-y-auto px-4 py-5 space-y-6">
-               <div>
-                  <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                     Core Navigation
-                  </div>
-                  <nav className="space-y-1">
-                     {mainNavItems.map((item) => (
-                        <NavLink
-                           key={item.path}
-                           to={item.path}
-                           onClick={onClose}
-                           className={({ isActive }) =>
-                              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                                 isActive
-                                    ? "bg-sidebar-accent text-sidebar-foreground font-semibold shadow-xs"
-                                    : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                              }`
-                           }
-                        >
-                           <item.icon className="h-4 w-4 shrink-0" />
-                           <span>{item.name}</span>
-                        </NavLink>
-                     ))}
-                  </nav>
-               </div>
+            {/* Navigation links */}
+            <div className="flex-1 px-4 py-2 space-y-6">
+               <nav className="space-y-1.5">
+                  {navItems.map((item) => (
+                     <NavLink
+                        key={item.path}
+                        to={item.path}
+                        onClick={onClose}
+                        className={({ isActive }) =>
+                           `flex items-center gap-3.5 px-4 py-3 rounded-xl text-base font-semibold transition-all ${
+                              isActive
+                                 ? "bg-primary/10 text-primary font-bold shadow-2xs"
+                                 : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                           }`
+                        }
+                     >
+                        <item.icon className="h-5 w-5 shrink-0 stroke-[2.2]" />
+                        <span>{item.name}</span>
+                     </NavLink>
+                  ))}
+               </nav>
 
-               <div>
-                  <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                     Extensions (Figma)
-                  </div>
-                  <nav className="space-y-1">
-                     {figmaExtraItems.map((item) => (
-                        <NavLink
-                           key={item.path}
-                           to={item.path}
-                           onClick={onClose}
-                           className={({ isActive }) =>
-                              `flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                                 isActive
-                                    ? "bg-sidebar-accent text-sidebar-foreground font-semibold"
-                                    : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                              }`
-                           }
-                        >
-                           <div className="flex items-center gap-3">
-                              <item.icon className="h-4 w-4 shrink-0" />
-                              <span>{item.name}</span>
-                           </div>
-                           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground border border-border">
-                              {item.badge}
-                           </span>
-                        </NavLink>
-                     ))}
-                  </nav>
+               {/* Primary Create Button */}
+               <div className="pt-2 px-1">
+                  <Button
+                     onClick={onOpenCreateModal}
+                     className="w-full h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-sm flex items-center justify-center gap-2 text-sm"
+                  >
+                     <Plus className="h-4 w-4 stroke-[3]" />
+                     <span>Create New Habit</span>
+                  </Button>
                </div>
             </div>
 
-            {/* Footer Workspace Info */}
-            <div className="p-4 border-t border-sidebar-border">
-               <div className="rounded-xl border border-border bg-card p-3 shadow-xs text-xs space-y-1">
-                  <div className="font-semibold text-foreground">
-                     Personal Habit Suite
-                  </div>
-                  <div className="text-muted-foreground text-[11px]">
-                     Dynamic stats & history engine
-                  </div>
+            {/* Bottom Profile User Card */}
+            <div className="p-4 border-t border-border">
+               <div className="flex items-center justify-between p-2 rounded-xl hover:bg-sidebar-accent/60 transition-colors">
+                  <Link
+                     to="/profile"
+                     className="flex items-center gap-3 min-w-0"
+                  >
+                     <div className="h-10 w-10 rounded-full bg-muted-foreground/20 flex items-center justify-center text-sm font-bold text-foreground shrink-0 border border-border">
+                        TP
+                     </div>
+                     <div className="flex flex-col min-w-0">
+                        <span className="text-sm font-bold truncate text-foreground">
+                           Tanay Pratap
+                        </span>
+                        <span className="text-xs text-primary font-medium hover:underline">
+                           View Profile
+                        </span>
+                     </div>
+                  </Link>
+
+                  <Link
+                     to="/login"
+                     className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                     title="Sign Out"
+                  >
+                     <LogOut className="h-4 w-4" />
+                  </Link>
                </div>
             </div>
          </aside>
