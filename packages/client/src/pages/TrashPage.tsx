@@ -1,17 +1,20 @@
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Sparkles } from "lucide-react";
 import { TopSearchHeader } from "@/components/layout/TopSearchHeader";
 import { HabitCard } from "@/components/habits/HabitCard";
 import { initialHabits } from "@/mock/staticData";
 import type { HabitItem } from "@/types/habit";
+import { useDeleteHabit } from "@/hooks/useHabits";
 
 export const TrashPage = () => {
    const [searchQuery, setSearchQuery] = useState("");
    const [trashHabits, setTrashHabits] = useState<HabitItem[]>(
       initialHabits.filter((h) => h.status === "Trash"),
    );
+   const deleteMutation = useDeleteHabit();
 
    const handleDeletePermanent = (id: string) => {
+      deleteMutation.mutate(id);
       setTrashHabits((prev) => prev.filter((h) => h.id !== id));
    };
 
@@ -47,7 +50,7 @@ export const TrashPage = () => {
             </span>
          </div>
 
-         {/* Grid of Trash Cards from Figma */}
+         {/* Grid of Trash Cards */}
          {filteredHabits.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                {filteredHabits.map((habit) => (
@@ -60,14 +63,16 @@ export const TrashPage = () => {
                ))}
             </div>
          ) : (
-            <div className="p-12 text-center text-sm text-muted-foreground rounded-2xl border border-dashed border-border bg-card/40 space-y-2">
-               <Trash2 className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
-               <div className="font-semibold text-foreground">
-                  Trash is empty
+            <div className="rounded-3xl border border-dashed border-border p-12 text-center space-y-3 bg-card/40">
+               <div className="h-10 w-10 rounded-xl bg-muted text-muted-foreground flex items-center justify-center mx-auto">
+                  <Sparkles className="h-5 w-5" />
                </div>
-               <p className="text-xs max-w-sm mx-auto">
-                  Deleted habits will appear here. You can permanently delete
-                  them whenever you wish.
+               <p className="text-sm font-bold text-foreground">
+                  Trash is clean & empty
+               </p>
+               <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                  Deleted habits will show here before being permanently removed
+                  from your database.
                </p>
             </div>
          )}

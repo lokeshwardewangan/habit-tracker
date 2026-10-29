@@ -1,16 +1,50 @@
-import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { Archive, Edit3, Trash2, ArrowLeft } from "lucide-react";
+import { Archive, Edit3, Trash2, ArrowLeft, Loader2 } from "lucide-react";
 import { initialHabits } from "@/mock/staticData";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useHabit, useArchiveHabit, useDeleteHabit } from "@/hooks/useHabits";
 
 export const HabitDetailPage = () => {
    const { id } = useParams<{ id: string }>();
    const navigate = useNavigate();
-   const [habits] = useState(initialHabits);
+   const { data: serverHabit, isLoading } = useHabit(id);
+   const archiveMutation = useArchiveHabit();
+   const deleteMutation = useDeleteHabit();
 
-   const habit = habits.find((h) => h.id === id) || habits[0];
+   // Fallback to static mock if server habit is not found
+   const fallbackHabit =
+      initialHabits.find((h) => h.id === id) || initialHabits[0];
+
+   const title = serverHabit?.name || fallbackHabit.title;
+   const startDate = serverHabit?.startDate || fallbackHabit.startDate;
+   const repeat = serverHabit?.frequency === "WEEKLY" ? "Weekly" : "Daily";
+   const status = serverHabit?.status || fallbackHabit.status;
+
+   const handleArchive = async () => {
+      if (id) {
+         await archiveMutation.mutateAsync(id);
+         navigate("/archive");
+      }
+   };
+
+   const handleDelete = async () => {
+      if (id) {
+         await deleteMutation.mutateAsync(id);
+         navigate("/home");
+      }
+   };
+
+   if (isLoading) {
+      return (
+         <div className="py-20 flex flex-col items-center justify-center gap-3">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-xs text-muted-foreground font-semibold">
+               Loading habit details...
+            </p>
+         </div>
+      );
+   }
 
    return (
       <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in-50 duration-200">
@@ -21,7 +55,7 @@ export const HabitDetailPage = () => {
                   variant="ghost"
                   size="icon-sm"
                   onClick={() => navigate("/home")}
-                  className="rounded-xl"
+                  className="rounded-xl cursor-pointer"
                   title="Back to Home"
                >
                   <ArrowLeft className="h-4 w-4" />
@@ -35,16 +69,15 @@ export const HabitDetailPage = () => {
             <div className="flex items-center gap-1.5">
                <button
                   type="button"
-                  onClick={() => {
-                     navigate("/archive");
-                  }}
-                  className="p-2 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                  onClick={handleArchive}
+                  disabled={archiveMutation.isPending}
+                  className="p-2 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
                   title="Archive Habit"
                >
                   <Archive className="h-4 w-4" />
                </button>
                <Link
-                  to={`/habits/${habit?.id}/edit`}
+                  to={`/habits/${id}/edit`}
                   className="p-2 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                   title="Edit Habit"
                >
@@ -52,10 +85,9 @@ export const HabitDetailPage = () => {
                </Link>
                <button
                   type="button"
-                  onClick={() => {
-                     navigate("/trash");
-                  }}
-                  className="p-2 rounded-xl text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                  onClick={handleDelete}
+                  disabled={deleteMutation.isPending}
+                  className="p-2 rounded-xl text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer"
                   title="Move to Trash"
                >
                   <Trash2 className="h-4 w-4" />
@@ -72,7 +104,7 @@ export const HabitDetailPage = () => {
                      Title
                   </div>
                   <div className="p-3 rounded-xl border border-border bg-muted/30 text-sm font-semibold text-foreground">
-                     {habit?.title}
+                     {title}
                   </div>
                </div>
 
@@ -83,7 +115,7 @@ export const HabitDetailPage = () => {
                         Start Date
                      </div>
                      <div className="p-3 rounded-xl border border-border bg-muted/30 text-sm text-foreground">
-                        {habit?.startDate}
+                        {startDate}
                      </div>
                   </div>
                   <div className="space-y-1.5">
@@ -91,7 +123,7 @@ export const HabitDetailPage = () => {
                         End Date
                      </div>
                      <div className="p-3 rounded-xl border border-border bg-muted/30 text-sm text-foreground">
-                        {habit?.endDate}
+                        {startDate}
                      </div>
                   </div>
                </div>
@@ -103,7 +135,7 @@ export const HabitDetailPage = () => {
                         Goal
                      </div>
                      <div className="p-3 rounded-xl border border-border bg-muted/30 text-sm text-foreground">
-                        {habit?.goalTimes} times
+                        1 times
                      </div>
                   </div>
                   <div className="space-y-1.5">
@@ -111,7 +143,7 @@ export const HabitDetailPage = () => {
                         Repeat
                      </div>
                      <div className="p-3 rounded-xl border border-border bg-muted/30 text-sm text-foreground">
-                        {habit?.repeat}
+                        {repeat}
                      </div>
                   </div>
                </div>
@@ -124,7 +156,7 @@ export const HabitDetailPage = () => {
                      </div>
                      <div className="p-3 rounded-xl border border-border bg-muted/30 text-sm text-foreground flex items-center gap-2 capitalize">
                         <span className="h-3.5 w-3.5 rounded-full bg-primary" />
-                        <span>{habit?.colour}</span>
+                        <span>Blue</span>
                      </div>
                   </div>
                   <div className="space-y-1.5">
@@ -132,7 +164,7 @@ export const HabitDetailPage = () => {
                         Status
                      </div>
                      <div className="p-3 rounded-xl border border-border bg-muted/30 text-sm text-foreground capitalize">
-                        {habit?.status}
+                        {status}
                      </div>
                   </div>
                </div>
@@ -143,15 +175,10 @@ export const HabitDetailPage = () => {
                      Labels
                   </div>
                   <div className="flex flex-wrap gap-2">
-                     {habit?.labels.map((lbl, idx) => (
-                        <div
-                           key={idx}
-                           className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border bg-muted/40 text-xs font-semibold text-foreground"
-                        >
-                           <span className="h-2 w-2 rounded-full bg-primary" />
-                           <span>{lbl}</span>
-                        </div>
-                     ))}
+                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border bg-muted/40 text-xs font-semibold text-foreground">
+                        <span className="h-2 w-2 rounded-full bg-primary" />
+                        <span>Daily Routine</span>
+                     </div>
                   </div>
                </div>
             </CardContent>

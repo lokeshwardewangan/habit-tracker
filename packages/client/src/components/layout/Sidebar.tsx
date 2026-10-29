@@ -1,4 +1,4 @@
-import { NavLink, Link } from "react-router-dom";
+import { NavLink, Link, useNavigate } from "react-router-dom";
 import {
    Home as HomeIcon,
    Tag,
@@ -9,6 +9,8 @@ import {
    X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 interface SidebarProps {
    isOpen?: boolean;
@@ -21,6 +23,22 @@ export const Sidebar = ({
    onClose,
    onOpenCreateModal,
 }: SidebarProps) => {
+   const { user, logout } = useAuth();
+   const navigate = useNavigate();
+
+   const displayName = user
+      ? `${user.firstName} ${user.lastName}`
+      : "Tanay Pratap";
+   const initials = user
+      ? `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase() ||
+        "U"
+      : "TP";
+
+   const handleLogout = async () => {
+      await logout();
+      toast.success("Signed out successfully");
+      navigate("/login");
+   };
    const navItems = [
       {
          name: "Home",
@@ -118,12 +136,12 @@ export const Sidebar = ({
                      to="/profile"
                      className="flex items-center gap-3 min-w-0"
                   >
-                     <div className="h-10 w-10 rounded-full bg-muted-foreground/20 flex items-center justify-center text-sm font-bold text-foreground shrink-0 border border-border">
-                        TP
+                     <div className="h-10 w-10 rounded-full bg-primary/15 text-primary flex items-center justify-center text-sm font-bold shrink-0 border border-primary/20">
+                        {initials}
                      </div>
                      <div className="flex flex-col min-w-0">
                         <span className="text-sm font-bold truncate text-foreground">
-                           Tanay Pratap
+                           {displayName}
                         </span>
                         <span className="text-xs text-primary font-medium hover:underline">
                            View Profile
@@ -131,13 +149,14 @@ export const Sidebar = ({
                      </div>
                   </Link>
 
-                  <Link
-                     to="/login"
-                     className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                  <button
+                     type="button"
+                     onClick={handleLogout}
+                     className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
                      title="Sign Out"
                   >
                      <LogOut className="h-4 w-4" />
-                  </Link>
+                  </button>
                </div>
             </div>
          </aside>

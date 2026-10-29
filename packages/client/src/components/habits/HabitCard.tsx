@@ -13,6 +13,8 @@ interface HabitCardProps {
    onToggleComplete?: (id: string) => void;
    onRestore?: (id: string) => void;
    onDeletePermanent?: (id: string) => void;
+   onArchive?: (id: string) => void;
+   onCardClick?: (id: string) => void;
    onClick?: () => void;
 }
 
@@ -69,14 +71,24 @@ export const HabitCard = ({
    onToggleComplete,
    onRestore,
    onDeletePermanent,
+   onArchive: _onArchive,
+   onCardClick,
    onClick,
 }: HabitCardProps) => {
    const style = colorStyles[habit.colour] || colorStyles.blue;
    const isCompleted = habit.currentTimes >= habit.goalTimes;
 
+   const handleCardClick = () => {
+      if (onCardClick) {
+         onCardClick(habit.id);
+      } else if (onClick) {
+         onClick();
+      }
+   };
+
    return (
       <div
-         onClick={onClick}
+         onClick={handleCardClick}
          className={cn(
             "group relative rounded-2xl border p-5 transition-all duration-200 shadow-2xs hover:shadow-md cursor-pointer flex flex-col justify-between min-h-[160px]",
             style.card,

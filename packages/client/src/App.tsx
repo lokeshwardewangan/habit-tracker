@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { queryClient } from "./lib/queryClient";
+import { AuthProvider } from "./context/AuthContext";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { AppLayout } from "./components/layout/AppLayout";
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -17,37 +19,48 @@ import { ProfilePage } from "./pages/ProfilePage";
 function App() {
    return (
       <QueryClientProvider client={queryClient}>
-         <BrowserRouter>
-            <Routes>
-               {/* Public Standalone Pages */}
-               <Route path="/" element={<LandingPage />} />
-               <Route path="/login" element={<LoginPage />} />
-               <Route path="/signup" element={<SignupPage />} />
+         <AuthProvider>
+            <BrowserRouter>
+               <Routes>
+                  {/* Public Standalone Pages */}
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/signup" element={<SignupPage />} />
 
-               {/* Authenticated Application Shell */}
-               <Route element={<AppLayout />}>
-                  <Route path="/home" element={<HomePage />} />
+                  {/* Authenticated Application Shell Protected by Route Guard */}
                   <Route
-                     path="/dashboard"
-                     element={<Navigate to="/home" replace />}
-                  />
-                  <Route
-                     path="/habits"
-                     element={<Navigate to="/home" replace />}
-                  />
-                  <Route path="/habits/:id" element={<HabitDetailPage />} />
-                  <Route path="/habits/:id/edit" element={<HabitEditPage />} />
-                  <Route path="/labels" element={<LabelsPage />} />
-                  <Route path="/archive" element={<ArchivePage />} />
-                  <Route path="/trash" element={<TrashPage />} />
-                  <Route path="/profile" element={<ProfilePage />} />
-               </Route>
+                     element={
+                        <ProtectedRoute>
+                           <AppLayout />
+                        </ProtectedRoute>
+                     }
+                  >
+                     <Route path="/home" element={<HomePage />} />
+                     <Route
+                        path="/dashboard"
+                        element={<Navigate to="/home" replace />}
+                     />
+                     <Route
+                        path="/habits"
+                        element={<Navigate to="/home" replace />}
+                     />
+                     <Route path="/habits/:id" element={<HabitDetailPage />} />
+                     <Route
+                        path="/habits/:id/edit"
+                        element={<HabitEditPage />}
+                     />
+                     <Route path="/labels" element={<LabelsPage />} />
+                     <Route path="/archive" element={<ArchivePage />} />
+                     <Route path="/trash" element={<TrashPage />} />
+                     <Route path="/profile" element={<ProfilePage />} />
+                  </Route>
 
-               {/* Catch-all */}
-               <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-         </BrowserRouter>
-         <Toaster position="top-right" richColors closeButton />
+                  {/* Catch-all */}
+                  <Route path="*" element={<Navigate to="/" replace />} />
+               </Routes>
+            </BrowserRouter>
+            <Toaster position="top-right" richColors closeButton />
+         </AuthProvider>
       </QueryClientProvider>
    );
 }

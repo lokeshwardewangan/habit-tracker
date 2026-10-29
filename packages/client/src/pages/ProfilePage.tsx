@@ -7,8 +7,21 @@ import {
    User as UserIcon,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAuth } from "@/context/AuthContext";
+import { useDashboardStats, useHabits } from "@/hooks/useHabits";
 
 export const ProfilePage = () => {
+   const { user } = useAuth();
+   const { data: stats } = useDashboardStats();
+   const { data: habits = [] } = useHabits("active");
+
+   const fullName = user
+      ? `${user.firstName} ${user.lastName}`
+      : "Tanay Pratap";
+   const email = user ? user.email : "tanay@example.com";
+   const habitScore = stats?.completionRate ?? 85;
+   const activeStreak = habits.length;
+   const todayCompletedCount = stats?.totalCompletionsInPeriod ?? 0;
    return (
       <div className="space-y-10 max-w-5xl mx-auto animate-in fade-in-50 duration-200">
          {/* Top Header */}
@@ -34,28 +47,28 @@ export const ProfilePage = () => {
                </div>
                <div className="space-y-0.5">
                   <div className="text-3xl font-extrabold text-foreground">
-                     12
+                     {activeStreak}
                   </div>
                   <div className="text-xs text-muted-foreground font-semibold">
-                     day streak
+                     active routines
                   </div>
                </div>
             </Card>
 
-            {/* Today 1 times */}
+            {/* Today Completed */}
             <Card className="rounded-2xl border-border bg-card p-5 shadow-2xs space-y-3">
                <div className="flex items-center justify-between">
                   <span className="text-sm font-bold text-foreground">
-                     Today Completed
+                     Completions
                   </span>
                   <Clock className="h-4 w-4 text-blue-500" />
                </div>
                <div className="space-y-0.5">
                   <div className="text-3xl font-extrabold text-foreground">
-                     4
+                     {todayCompletedCount}
                   </div>
                   <div className="text-xs text-muted-foreground font-semibold">
-                     times
+                     logged records
                   </div>
                </div>
             </Card>
@@ -70,7 +83,7 @@ export const ProfilePage = () => {
                </div>
                <div className="space-y-0.5">
                   <div className="text-3xl font-extrabold text-foreground">
-                     85{" "}
+                     {habitScore}{" "}
                      <span className="text-sm font-semibold text-muted-foreground">
                         /100
                      </span>
@@ -141,11 +154,9 @@ export const ProfilePage = () => {
                </div>
                <div className="space-y-0.5">
                   <div className="text-lg font-bold text-foreground">
-                     Tanay Pratap
+                     {fullName}
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                     tanay@example.com
-                  </div>
+                  <div className="text-xs text-muted-foreground">{email}</div>
                   <div className="text-[11px] font-semibold text-primary pt-1">
                      Productivity Enthusiast • Member since May 2021
                   </div>

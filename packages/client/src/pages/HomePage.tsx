@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
    Plus,
@@ -7,55 +7,155 @@ import {
    CheckCircle2,
    TrendingUp,
    Search,
-   Filter,
+   Sparkles,
+   Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HabitCard } from "@/components/habits/HabitCard";
 import { NewHabitModal } from "@/components/habits/NewHabitModal";
-import { initialHabits } from "@/mock/staticData";
-import type { HabitItem } from "@/types/habit";
+import { CalendarHistoryModal } from "@/components/habits/CalendarHistoryModal";
+import type { HabitItem, HabitColor } from "@/types/habit";
+import type { Habit } from "@/types/api";
 import { format } from "date-fns";
+import { useAuth } from "@/context/AuthContext";
+import {
+   useHabits,
+   useDashboardStats,
+   useToggleCompletion,
+   useCreateHabit,
+   useArchiveHabit,
+} from "@/hooks/useHabits";
+import { toast } from "sonner";
+
+const PASTEL_COLORS: HabitColor[] = ["blue", "rose", "amber", "mint"];
 
 export const HomePage = () => {
+   const { user } = useAuth();
    const navigate = useNavigate();
-   const [habits, setHabits] = useState<HabitItem[]>(initialHabits);
    const [isModalOpen, setIsModalOpen] = useState(false);
    const [filterTab, setFilterTab] = useState<"all" | "active" | "completed">(
       "all",
    );
    const [searchQuery, setSearchQuery] = useState("");
+   const [selectedHabitForCalendar, setSelectedHabitForCalendar] =
+      useState<Habit | null>(null);
 
    const [todayFormatted] = useState(() => format(new Date(), "EEEE, MMMM d"));
+   const [todayDateStr] = useState(() => format(new Date(), "yyyy-MM-dd"));
+   const firstName = user?.firstName || "Tanay";
 
-   // Toggle habit completion on checkmark click
-   const handleToggleComplete = (id: string) => {
-      setHabits((prev) =>
-         prev.map((habit) => {
-            if (habit.id === id) {
-               const willBeCompleted = habit.status === "Active";
-               return {
-                  ...habit,
-                  status: willBeCompleted ? "Completed" : "Active",
-                  currentTimes: willBeCompleted ? habit.goalTimes : 0,
-                  streak: willBeCompleted
-                     ? (habit.streak || 0) + 1
-                     : Math.max(0, (habit.streak || 1) - 1),
-               };
+   // Live TanStack queries
+   const { data: serverHabits = [], isLoading: isHabitsLoading } =
+      useHabits("active");
+   const { data: stats } = useDashboardStats();
+   const toggleCompletion = useToggleCompletion();
+   const createHabit = useCreateHabit();
+   const archiveHabit = useArchiveHabit();
+
+   // Local completion override state for instant UI feedback before refetch
+   const [completedTodayIds, setCompletedTodayIds] = useState<Set<string>>(
+      new Set(),
+   );
+
+   // Map backend habits to UI habit items
+   const habitItems: HabitItem[] = useMemo(() => {
+      return serverHabits.map((h, idx) => {
+         const isCompletedToday = completedTodayIds.has(h.id);
+         return {
+            id: h.id,
+            title: h.name,
+            startDate: h.startDate,
+            endDate: h.startDate,
+            goalTimes: 1,
+            currentTimes: isCompletedToday ? 1 : 0,
+            repeat: h.frequency === "WEEKLY" ? "Weekly" : "Daily",
+            colour: PASTEL_COLORS[idx % PASTEL_COLORS.length],
+            status: isCompletedToday ? "Completed" : "Active",
+            labels: [
+               h.frequency === "WEEKLY" ? "Weekly Routine" : "Daily Routine",
+            ],
+            streak: stats?.activeHabits || 1,
+         };
+      });
+   }, [serverHabits, completedTodayIds, stats]);
+
+   // Handle checkmark click: toggle completion on backend API
+   const handleToggleComplete = async (habitId: string) => {
+      const isCurrentlyCompleted = completedTodayIds.has(habitId);
+
+      // Optimistic update
+      setCompletedTodayIds((prev) => {
+         const next = new Set(prev);
+         if (isCurrentlyCompleted) {
+            next.delete(habitId);
+         } else {
+            next.add(habitId);
+         }
+         return next;
+      });
+
+      try {
+         await toggleCompletion.mutateAsync({
+            habitId,
+            date: todayDateStr,
+            completed: isCurrentlyCompleted,
+         });
+         toast.success(
+            isCurrentlyCompleted
+               ? "Habit completion undone"
+               : "Great job! Habit checked off for today.",
+         );
+      } catch {
+         // Rollback optimistic state
+         setCompletedTodayIds((prev) => {
+            const next = new Set(prev);
+            if (isCurrentlyCompleted) {
+               next.add(habitId);
+            } else {
+               next.delete(habitId);
             }
-            return habit;
-         }),
-      );
+            return next;
+         });
+      }
    };
 
-   const handleCreateHabit = (newHabit: HabitItem) => {
-      setHabits((prev) => [newHabit, ...prev]);
+   // Handle Card click -> Open Calendar History or Detail
+   const handleCardClick = (habitId: string) => {
+      const targetHabit = serverHabits.find((h) => h.id === habitId);
+      if (targetHabit) {
+         setSelectedHabitForCalendar(targetHabit);
+      } else {
+         navigate(`/habits/${habitId}`);
+      }
    };
 
-   const activeList = habits.filter((h) => h.status === "Active");
-   const completedList = habits.filter((h) => h.status === "Completed");
+   // Seed Starter Habits directly into MongoDB
+   const handleSeedStarterHabits = async () => {
+      const starterList = [
+         { name: "Morning Run (5km)", frequency: "DAILY" as const },
+         { name: "Deep Work (2 Hours)", frequency: "DAILY" as const },
+         { name: "Read 20 Pages", frequency: "DAILY" as const },
+         { name: "Drink 2L Water", frequency: "DAILY" as const },
+      ];
 
-   const filteredHabits = habits.filter((h) => {
-      if (h.status !== "Active" && h.status !== "Completed") return false;
+      try {
+         for (const item of starterList) {
+            await createHabit.mutateAsync({
+               name: item.name,
+               startDate: todayDateStr,
+               frequency: item.frequency,
+            });
+         }
+         toast.success("Starter habits loaded into your account!");
+      } catch {
+         toast.error("Could not load starter habits");
+      }
+   };
+
+   const activeList = habitItems.filter((h) => h.status === "Active");
+   const completedList = habitItems.filter((h) => h.status === "Completed");
+
+   const filteredHabits = habitItems.filter((h) => {
       if (filterTab === "active" && h.status !== "Active") return false;
       if (filterTab === "completed" && h.status !== "Completed") return false;
       if (searchQuery.trim()) {
@@ -84,12 +184,14 @@ export const HomePage = () => {
                   <span>{todayFormatted}</span>
                </div>
                <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-foreground">
-                  Welcome, Tanay 👋
+                  Welcome, {firstName} 👋
                </h1>
                <p className="text-sm text-muted-foreground max-w-lg leading-relaxed">
                   {activeList.length > 0
                      ? `You have ${activeList.length} routines remaining today. Keep up the steady momentum!`
-                     : "All routines checked off for today! Outstanding consistency."}
+                     : totalCount > 0
+                       ? "All routines checked off for today! Outstanding consistency."
+                       : "Start your journey today by creating your first healthy routine."}
                </p>
             </div>
 
@@ -97,7 +199,7 @@ export const HomePage = () => {
             <div className="flex items-center gap-3 shrink-0">
                <Button
                   onClick={() => setIsModalOpen(true)}
-                  className="h-11 px-6 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-xs text-sm flex items-center gap-2"
+                  className="h-11 px-6 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-xs text-sm flex items-center gap-2 cursor-pointer"
                >
                   <Plus className="h-4 w-4 stroke-[3]" />
                   <span>Create Habit</span>
@@ -132,60 +234,47 @@ export const HomePage = () => {
                </div>
             </div>
 
-            {/* Active Streak */}
+            {/* Active Routines */}
             <div className="rounded-2xl border border-border bg-card p-5 shadow-2xs space-y-3">
                <div className="flex items-center justify-between text-muted-foreground text-xs font-semibold">
-                  <span>Best Active Streak</span>
+                  <span>Active Routines</span>
                   <Flame className="h-4 w-4 text-amber-500 fill-amber-500" />
                </div>
-               <div className="flex items-baseline justify-between">
-                  <div className="text-2xl font-black text-foreground">
-                     14{" "}
-                     <span className="text-sm font-semibold text-muted-foreground">
-                        days
-                     </span>
-                  </div>
-                  <span className="text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md">
-                     On Fire
-                  </span>
+               <div className="text-2xl font-black text-foreground">
+                  {serverHabits.length}
                </div>
                <div className="text-xs text-muted-foreground">
-                  Task #4 has been completed 14 days straight
+                  {activeList.length} remaining for today
                </div>
             </div>
 
-            {/* Consistency Index */}
+            {/* Consistency Rate */}
             <div className="rounded-2xl border border-border bg-card p-5 shadow-2xs space-y-3">
                <div className="flex items-center justify-between text-muted-foreground text-xs font-semibold">
-                  <span>Monthly Consistency</span>
+                  <span>Completion Rate</span>
                   <TrendingUp className="h-4 w-4 text-primary" />
                </div>
-               <div className="flex items-baseline justify-between">
-                  <div className="text-2xl font-black text-foreground">
-                     85{" "}
-                     <span className="text-sm font-semibold text-muted-foreground">
-                        / 100
-                     </span>
-                  </div>
-                  <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md">
-                     High
-                  </span>
+               <div className="text-2xl font-black text-foreground">
+                  {stats?.completionRate
+                     ? `${stats.completionRate}%`
+                     : `${completionRate}%`}
                </div>
                <div className="text-xs text-muted-foreground">
-                  Calculated from your logged historical checkoffs
+                  Calculated dynamically from MongoDB
                </div>
             </div>
          </div>
 
-         {/* Habit Section with Clean Filters & Search */}
+         {/* Habits Workspace Section */}
          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
-               {/* Filter Tabs */}
-               <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/60 border border-border/80 w-fit">
+            {/* Filter and Search Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2">
+               {/* Segmented Filter Controls */}
+               <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/60 border border-border/60 w-fit">
                   <button
                      type="button"
                      onClick={() => setFilterTab("all")}
-                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                     className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         filterTab === "all"
                            ? "bg-card text-foreground shadow-2xs"
                            : "text-muted-foreground hover:text-foreground"
@@ -196,7 +285,7 @@ export const HomePage = () => {
                   <button
                      type="button"
                      onClick={() => setFilterTab("active")}
-                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                     className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         filterTab === "active"
                            ? "bg-card text-foreground shadow-2xs"
                            : "text-muted-foreground hover:text-foreground"
@@ -207,7 +296,7 @@ export const HomePage = () => {
                   <button
                      type="button"
                      onClick={() => setFilterTab("completed")}
-                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                     className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         filterTab === "completed"
                            ? "bg-card text-foreground shadow-2xs"
                            : "text-muted-foreground hover:text-foreground"
@@ -217,21 +306,29 @@ export const HomePage = () => {
                   </button>
                </div>
 
-               {/* Quick Search */}
+               {/* Quick In-page Search */}
                <div className="relative w-full sm:w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                   <input
                      type="text"
+                     placeholder="Search routines..."
                      value={searchQuery}
                      onChange={(e) => setSearchQuery(e.target.value)}
-                     placeholder="Search habits..."
-                     className="w-full h-9 pl-9 pr-3 rounded-xl border border-border bg-card text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+                     className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-border bg-card text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                </div>
             </div>
 
-            {/* Habits Grid */}
-            {filteredHabits.length > 0 ? (
+            {/* Loading State */}
+            {isHabitsLoading ? (
+               <div className="py-16 flex flex-col items-center justify-center gap-3">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <p className="text-xs text-muted-foreground font-semibold">
+                     Loading your routines from MongoDB...
+                  </p>
+               </div>
+            ) : filteredHabits.length > 0 ? (
+               /* Cards Grid */
                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {filteredHabits.map((habit) => (
                      <HabitCard
@@ -239,21 +336,55 @@ export const HomePage = () => {
                         habit={habit}
                         mode="home"
                         onToggleComplete={handleToggleComplete}
-                        onClick={() => navigate(`/habits/${habit.id}`)}
+                        onCardClick={handleCardClick}
+                        onArchive={(id: string) => archiveHabit.mutate(id)}
                      />
                   ))}
                </div>
             ) : (
-               <div className="p-12 text-center text-sm text-muted-foreground rounded-2xl border border-dashed border-border bg-card/40 space-y-3">
-                  <Filter className="h-7 w-7 mx-auto text-muted-foreground/40" />
-                  <div className="font-semibold text-foreground">
-                     No habits found
+               /* Empty State */
+               <div className="rounded-3xl border border-dashed border-border p-12 text-center space-y-4 bg-card/40">
+                  <div className="h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto">
+                     <Sparkles className="h-6 w-6" />
                   </div>
-                  <p className="text-xs max-w-sm mx-auto">
-                     {searchQuery
-                        ? `No results matching "${searchQuery}". Try a different keyword.`
-                        : "No habits in this tab. Click '+ Create Habit' to add a new one."}
-                  </p>
+                  <div className="space-y-1 max-w-sm mx-auto">
+                     <h3 className="text-base font-bold text-foreground">
+                        {searchQuery
+                           ? "No matching routines found"
+                           : "No routines found"}
+                     </h3>
+                     <p className="text-xs text-muted-foreground">
+                        {searchQuery
+                           ? "Try clearing your search query or switching filters."
+                           : "Get started by adding your first daily habit, or load our pre-configured starter routines."}
+                     </p>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                     <Button
+                        onClick={() => setIsModalOpen(true)}
+                        className="rounded-xl bg-primary text-primary-foreground font-semibold text-xs px-4 py-2 cursor-pointer"
+                     >
+                        <Plus className="h-3.5 w-3.5 mr-1.5" />
+                        Create Habit
+                     </Button>
+                     {!searchQuery && serverHabits.length === 0 && (
+                        <Button
+                           variant="outline"
+                           onClick={handleSeedStarterHabits}
+                           disabled={createHabit.isPending}
+                           className="rounded-xl border-border font-semibold text-xs px-4 py-2 cursor-pointer"
+                        >
+                           {createHabit.isPending ? (
+                              <>
+                                 <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                                 Loading...
+                              </>
+                           ) : (
+                              "⚡ Load Starter Habits"
+                           )}
+                        </Button>
+                     )}
+                  </div>
                </div>
             )}
          </div>
@@ -262,7 +393,20 @@ export const HomePage = () => {
          <NewHabitModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
-            onCreate={handleCreateHabit}
+            onCreate={async (habit) => {
+               await createHabit.mutateAsync({
+                  name: habit.title,
+                  startDate: todayDateStr,
+                  frequency: habit.repeat === "Weekly" ? "WEEKLY" : "DAILY",
+               });
+            }}
+         />
+
+         {/* Calendar History Modal */}
+         <CalendarHistoryModal
+            habit={selectedHabitForCalendar}
+            isOpen={!!selectedHabitForCalendar}
+            onClose={() => setSelectedHabitForCalendar(null)}
          />
       </div>
    );
