@@ -35,7 +35,8 @@ export class HabitController {
       try {
          const userId = this.getUserId(req);
          const status = req.query.status as string | undefined;
-         const habits = await this.service.getHabits(userId, status);
+         const date = req.query.date as string | undefined;
+         const habits = await this.service.getHabits(userId, status, date);
          sendSuccess(res, habits, 200);
       } catch (error) {
          next(error);
@@ -123,6 +124,40 @@ export class HabitController {
             req.params.id as string,
          );
          sendSuccess(res, habit, 200, "Habit unarchived successfully");
+      } catch (error) {
+         next(error);
+      }
+   };
+
+   trash = async (
+      req: Request,
+      res: Response,
+      next: NextFunction,
+   ): Promise<void> => {
+      try {
+         const userId = this.getUserId(req);
+         const habit = await this.service.trashHabit(
+            userId,
+            req.params.id as string,
+         );
+         sendSuccess(res, habit, 200, "Habit moved to trash");
+      } catch (error) {
+         next(error);
+      }
+   };
+
+   restore = async (
+      req: Request,
+      res: Response,
+      next: NextFunction,
+   ): Promise<void> => {
+      try {
+         const userId = this.getUserId(req);
+         const habit = await this.service.restoreFromTrash(
+            userId,
+            req.params.id as string,
+         );
+         sendSuccess(res, habit, 200, "Habit restored from trash");
       } catch (error) {
          next(error);
       }

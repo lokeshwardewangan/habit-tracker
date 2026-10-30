@@ -2,6 +2,10 @@ import {
    habitRepository,
    type HabitRepository,
 } from "../repositories/habit.repository.js";
+import {
+   completionRepository,
+   type CompletionRepository,
+} from "../repositories/completion.repository.js";
 import { Completion } from "../models/Completion.js";
 import { NotFoundError } from "../utils/errors.js";
 import type {
@@ -11,7 +15,18 @@ import type {
 import type { HabitStatus } from "../models/Habit.js";
 
 export class HabitService {
-   constructor(private habitRepo: HabitRepository = habitRepository) {}
+   constructor(
+      private habitRepo: HabitRepository = habitRepository,
+      private completionRepo: CompletionRepository = completionRepository,
+   ) {}
+
+   private getTodayDate(): string {
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+   }
 
    async createHabit(userId: string, input: CreateHabitInput) {
       const habit = await this.habitRepo.create({
@@ -20,21 +35,36 @@ export class HabitService {
          description: input.description,
          startDate: input.startDate,
          frequency: input.frequency,
+         labels: input.labels || [],
          status: "ACTIVE",
       });
-      return habit.toJSON();
+      return { ...habit.toJSON(), isCompletedToday: false };
    }
 
-   async getHabits(userId: string, statusQuery?: string) {
+   async getHabits(userId: string, statusQuery?: string, dateQuery?: string) {
       let statusFilter: HabitStatus | undefined;
       if (statusQuery === "active") {
          statusFilter = "ACTIVE";
       } else if (statusQuery === "archived") {
          statusFilter = "ARCHIVED";
+      } else if (statusQuery === "trashed") {
+         statusFilter = "TRASHED";
       }
 
-      const habits = await this.habitRepo.findAllByUser(userId, statusFilter);
-      return habits.map((h) => h.toJSON());
+      const checkDate = dateQuery || this.getTodayDate();
+      const [habits, completionsToday] = await Promise.all([
+         this.habitRepo.findAllByUser(userId, statusFilter),
+         this.completionRepo.findByUserAndDate(userId, checkDate),
+      ]);
+
+      const completedIds = new Set(
+         completionsToday.map((c) => c.habitId.toString()),
+      );
+
+      return habits.map((h) => ({
+         ...h.toJSON(),
+         isCompletedToday: completedIds.has(h._id.toString()),
+      }));
    }
 
    async getHabitById(userId: string, habitId: string) {
@@ -75,6 +105,36 @@ export class HabitService {
    }
 
    async unarchiveHabit(userId: string, habitId: string) {
+      const habit = await this.habitRepo.findByUserAndId(userId, habitId);
+      if (!habit) {
+         throw new NotFoundError("Habit not found");
+      }
+
+      const updated = await this.habitRepo.updateById(habitId, {
+         status: "ACTIVE",
+      });
+      if (!updated) {
+         throw new NotFoundError("Habit not found");
+      }
+      return updated.toJSON();
+   }
+
+   async trashHabit(userId: string, habitId: string) {
+      const habit = await this.habitRepo.findByUserAndId(userId, habitId);
+      if (!habit) {
+         throw new NotFoundError("Habit not found");
+      }
+
+      const updated = await this.habitRepo.updateById(habitId, {
+         status: "TRASHED",
+      });
+      if (!updated) {
+         throw new NotFoundError("Habit not found");
+      }
+      return updated.toJSON();
+   }
+
+   async restoreFromTrash(userId: string, habitId: string) {
       const habit = await this.habitRepo.findByUserAndId(userId, habitId);
       if (!habit) {
          throw new NotFoundError("Habit not found");

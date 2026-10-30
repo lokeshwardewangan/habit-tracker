@@ -1,7 +1,7 @@
 import { Schema, model, type Document, type Model, type Types } from "mongoose";
 
 export type HabitFrequency = "DAILY" | "WEEKLY";
-export type HabitStatus = "ACTIVE" | "ARCHIVED";
+export type HabitStatus = "ACTIVE" | "ARCHIVED" | "TRASHED";
 
 export interface IHabit {
    userId: Types.ObjectId;
@@ -10,6 +10,7 @@ export interface IHabit {
    startDate: string;
    frequency: HabitFrequency;
    status: HabitStatus;
+   labels?: string[];
    createdAt: Date;
    updatedAt: Date;
 }
@@ -49,9 +50,13 @@ const habitSchema = new Schema<IHabitDocument>(
       },
       status: {
          type: String,
-         enum: ["ACTIVE", "ARCHIVED"],
+         enum: ["ACTIVE", "ARCHIVED", "TRASHED"],
          default: "ACTIVE",
          index: true,
+      },
+      labels: {
+         type: [String],
+         default: [],
       },
    },
    {

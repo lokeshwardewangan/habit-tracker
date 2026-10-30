@@ -16,6 +16,7 @@ export const createHabitSchema = z.object({
       .string()
       .regex(/^\d{4}-\d{2}-\d{2}$/, "Start date must be in YYYY-MM-DD format"),
    frequency: z.enum(["DAILY", "WEEKLY"]).default("DAILY"),
+   labels: z.array(z.string()).optional().default([]),
 });
 
 export const updateHabitSchema = z.object({
@@ -35,10 +36,18 @@ export const updateHabitSchema = z.object({
       .regex(/^\d{4}-\d{2}-\d{2}$/, "Start date must be in YYYY-MM-DD format")
       .optional(),
    frequency: z.enum(["DAILY", "WEEKLY"]).optional(),
+   labels: z.array(z.string()).optional(),
 });
 
 export const habitQuerySchema = z.object({
-   status: z.enum(["active", "archived", "all"]).optional().default("active"),
+   status: z
+      .enum(["active", "archived", "trashed", "all"])
+      .optional()
+      .default("active"),
+   date: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD")
+      .optional(),
 });
 
 export const habitIdParamSchema = z.object({

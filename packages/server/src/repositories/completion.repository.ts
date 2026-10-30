@@ -85,6 +85,17 @@ export class CompletionRepository {
          .exec();
    }
 
+   async findByUserAndDate(
+      userId: string,
+      date: string,
+   ): Promise<ICompletionDocument[]> {
+      if (!Types.ObjectId.isValid(userId)) return [];
+      return Completion.find({
+         userId: new Types.ObjectId(userId),
+         date,
+      }).exec();
+   }
+
    async countByUserAndRange(
       userId: string,
       from: string,

@@ -48,6 +48,16 @@ router.post(
    validate({ params: habitIdParamSchema }),
    habitController.unarchive,
 );
+router.post(
+   "/:id/trash",
+   validate({ params: habitIdParamSchema }),
+   habitController.trash,
+);
+router.post(
+   "/:id/restore",
+   validate({ params: habitIdParamSchema }),
+   habitController.restore,
+);
 
 // Completion routes
 router.get(

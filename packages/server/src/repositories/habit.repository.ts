@@ -13,6 +13,7 @@ export interface CreateHabitDTO {
    startDate: string;
    frequency?: HabitFrequency;
    status?: HabitStatus;
+   labels?: string[];
 }
 
 export class HabitRepository {
@@ -63,6 +64,7 @@ export class HabitRepository {
          startDate: string;
          frequency: HabitFrequency;
          status: HabitStatus;
+         labels: string[];
       }>,
    ): Promise<IHabitDocument | null> {
       if (!Types.ObjectId.isValid(id)) return null;
