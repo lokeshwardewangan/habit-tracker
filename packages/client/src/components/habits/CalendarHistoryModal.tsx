@@ -27,6 +27,7 @@ import {
    useArchiveHabit,
 } from "@/hooks/useHabits";
 import { Button } from "@/components/ui/button";
+import { ActionTooltip } from "@/components/ui/tooltip";
 import type { Habit } from "@/types/api";
 
 interface CalendarHistoryModalProps {
@@ -100,47 +101,62 @@ export const CalendarHistoryModal = ({
                   </div>
                </div>
                <div className="flex items-center gap-2">
-                  <Button
-                     variant="outline"
-                     size="sm"
-                     onClick={handleArchive}
-                     className="h-8 gap-1.5 rounded-xl border-border text-xs text-muted-foreground hover:text-foreground cursor-pointer"
-                     title="Archive Routine"
-                  >
-                     <Archive className="h-3.5 w-3.5" />
-                     <span>Archive</span>
-                  </Button>
-                  <button
-                     type="button"
-                     onClick={onClose}
-                     className="rounded-xl p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
-                  >
-                     <X className="h-5 w-5" />
-                  </button>
+                  <ActionTooltip content="Archive Routine">
+                     <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleArchive}
+                        className="h-8 gap-1.5 rounded-xl border-border text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+                        aria-label="Archive Routine"
+                     >
+                        <Archive className="h-3.5 w-3.5" />
+                        <span>Archive</span>
+                     </Button>
+                  </ActionTooltip>
+                  <ActionTooltip content="Close">
+                     <button
+                        type="button"
+                        onClick={onClose}
+                        className="rounded-xl p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+                        aria-label="Close"
+                     >
+                        <X className="h-5 w-5" />
+                     </button>
+                  </ActionTooltip>
                </div>
             </div>
 
             {/* Month Navigation */}
             <div className="flex items-center justify-between py-4">
-               <Button
-                  variant="outline"
-                  size="icon-sm"
-                  onClick={() => setCurrentMonth((prev) => subMonths(prev, 1))}
-                  className="rounded-xl border-border"
-               >
-                  <ChevronLeft className="h-4 w-4" />
-               </Button>
+               <ActionTooltip content="Previous Month">
+                  <Button
+                     variant="outline"
+                     size="icon-sm"
+                     onClick={() =>
+                        setCurrentMonth((prev) => subMonths(prev, 1))
+                     }
+                     className="rounded-xl border-border cursor-pointer"
+                     aria-label="Previous Month"
+                  >
+                     <ChevronLeft className="h-4 w-4" />
+                  </Button>
+               </ActionTooltip>
                <h4 className="text-sm font-bold text-foreground">
                   {format(currentMonth, "MMMM yyyy")}
                </h4>
-               <Button
-                  variant="outline"
-                  size="icon-sm"
-                  onClick={() => setCurrentMonth((prev) => addMonths(prev, 1))}
-                  className="rounded-xl border-border"
-               >
-                  <ChevronRight className="h-4 w-4" />
-               </Button>
+               <ActionTooltip content="Next Month">
+                  <Button
+                     variant="outline"
+                     size="icon-sm"
+                     onClick={() =>
+                        setCurrentMonth((prev) => addMonths(prev, 1))
+                     }
+                     className="rounded-xl border-border cursor-pointer"
+                     aria-label="Next Month"
+                  >
+                     <ChevronRight className="h-4 w-4" />
+                  </Button>
+               </ActionTooltip>
             </div>
 
             {/* Days of Week */}
@@ -162,33 +178,35 @@ export const CalendarHistoryModal = ({
                   const isCompleted = completedDates.has(dateStr);
                   const isCurrentDay = isToday(day);
                   const isFutureDate = isFuture(day) && !isCurrentDay;
+                  const label = `${dateStr}: ${isCompleted ? "Completed" : "Not completed"}`;
 
                   return (
-                     <button
-                        key={dateStr}
-                        type="button"
-                        disabled={isFutureDate || toggleCompletion.isPending}
-                        onClick={() => handleDayClick(day)}
-                        className={`h-10 w-full rounded-xl flex flex-col items-center justify-center text-xs font-semibold relative transition-all cursor-pointer ${
-                           !isCurrentMonth ? "opacity-30" : "opacity-100"
-                        } ${
-                           isCompleted
-                              ? "bg-emerald-500 text-white font-bold shadow-xs hover:bg-emerald-600"
-                              : isFutureDate
-                                ? "text-muted-foreground/40 cursor-not-allowed"
-                                : "text-foreground hover:bg-muted/70"
-                        } ${
-                           isCurrentDay && !isCompleted
-                              ? "border-2 border-primary text-primary font-bold"
-                              : ""
-                        }`}
-                        title={`${dateStr}: ${isCompleted ? "Completed" : "Not completed"}`}
-                     >
-                        <span>{format(day, "d")}</span>
-                        {isCompleted && (
-                           <Check className="h-3 w-3 stroke-[3] mt-0.5" />
-                        )}
-                     </button>
+                     <ActionTooltip key={dateStr} content={label}>
+                        <button
+                           type="button"
+                           disabled={isFutureDate || toggleCompletion.isPending}
+                           onClick={() => handleDayClick(day)}
+                           className={`h-10 w-full rounded-xl flex flex-col items-center justify-center text-xs font-semibold relative transition-all cursor-pointer ${
+                              !isCurrentMonth ? "opacity-30" : "opacity-100"
+                           } ${
+                              isCompleted
+                                 ? "bg-emerald-500 text-white font-bold shadow-xs hover:bg-emerald-600"
+                                 : isFutureDate
+                                   ? "text-muted-foreground/40 cursor-not-allowed"
+                                   : "text-foreground hover:bg-muted/70"
+                           } ${
+                              isCurrentDay && !isCompleted
+                                 ? "border-2 border-primary text-primary font-bold"
+                                 : ""
+                           }`}
+                           aria-label={label}
+                        >
+                           <span>{format(day, "d")}</span>
+                           {isCompleted && (
+                              <Check className="h-3 w-3 stroke-[3] mt-0.5" />
+                           )}
+                        </button>
+                     </ActionTooltip>
                   );
                })}
             </div>

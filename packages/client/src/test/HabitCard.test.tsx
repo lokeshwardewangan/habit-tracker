@@ -37,7 +37,7 @@ describe("HabitCard component", () => {
          />,
       );
 
-      const checkmarkButton = screen.getByTitle("Mark as completed");
+      const checkmarkButton = screen.getByLabelText("Mark as completed");
       fireEvent.click(checkmarkButton);
 
       expect(handleToggle).toHaveBeenCalledWith("habit-1");
@@ -53,7 +53,7 @@ describe("HabitCard component", () => {
          />,
       );
 
-      const restoreButton = screen.getByTitle("Restore Habit");
+      const restoreButton = screen.getByLabelText("Restore Habit");
       fireEvent.click(restoreButton);
 
       expect(handleRestore).toHaveBeenCalledWith("habit-1");
@@ -69,7 +69,7 @@ describe("HabitCard component", () => {
          />,
       );
 
-      const deleteButton = screen.getByTitle("Permanently Delete");
+      const deleteButton = screen.getByLabelText("Permanently Delete");
       fireEvent.click(deleteButton);
 
       expect(handleDelete).toHaveBeenCalledWith("habit-1");

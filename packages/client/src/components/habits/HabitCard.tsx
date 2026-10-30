@@ -8,6 +8,7 @@ import {
 import type { HabitItem } from "@/types/habit";
 import { cn } from "@/lib/utils";
 import { COLOR_PALETTES } from "@/constants/habits";
+import { ActionTooltip } from "@/components/ui/tooltip";
 
 interface HabitCardProps {
    habit: HabitItem;
@@ -60,67 +61,95 @@ export const HabitCard = ({
                {mode === "home" && (
                   <div className="flex items-center gap-1.5 shrink-0">
                      {onArchive && (
+                        <ActionTooltip content="Archive Habit">
+                           <button
+                              type="button"
+                              onClick={(e) => {
+                                 e.stopPropagation();
+                                 onArchive(habit.id);
+                              }}
+                              className="flex h-7 w-7 items-center justify-center rounded-lg border border-transparent hover:border-border/60 hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+                              aria-label="Archive Habit"
+                           >
+                              <Archive className="h-3.5 w-3.5" />
+                           </button>
+                        </ActionTooltip>
+                     )}
+                     <ActionTooltip
+                        content={
+                           isCompleted ? "Mark incomplete" : "Mark as completed"
+                        }
+                     >
                         <button
                            type="button"
                            onClick={(e) => {
                               e.stopPropagation();
-                              onArchive(habit.id);
+                              onToggleComplete?.(habit.id);
                            }}
-                           className="flex h-7 w-7 items-center justify-center rounded-lg border border-transparent hover:border-border/60 hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-                           title="Archive Habit"
-                           aria-label="Archive Habit"
-                        >
-                           <Archive className="h-3.5 w-3.5" />
-                        </button>
-                     )}
-                     <button
-                        type="button"
-                        onClick={(e) => {
-                           e.stopPropagation();
-                           onToggleComplete?.(habit.id);
-                        }}
-                        className={cn(
-                           "flex h-7 w-7 items-center justify-center rounded-full border transition-transform active:scale-90 bg-white/80 dark:bg-black/30 shadow-2xs cursor-pointer",
-                           isCompleted ? style.checkBg : style.checkBorder,
-                        )}
-                        title={isCompleted ? "Completed" : "Mark as completed"}
-                     >
-                        <Check
                            className={cn(
-                              "h-4 w-4 stroke-[3]",
-                              isCompleted ? "text-white" : "opacity-60",
+                              "flex h-7 w-7 items-center justify-center rounded-full border transition-transform active:scale-90 bg-white/80 dark:bg-black/30 shadow-2xs cursor-pointer",
+                              isCompleted ? style.checkBg : style.checkBorder,
                            )}
-                        />
-                     </button>
+                           aria-label={
+                              isCompleted ? "Completed" : "Mark as completed"
+                           }
+                        >
+                           <Check
+                              className={cn(
+                                 "h-4 w-4 stroke-[3]",
+                                 isCompleted ? "text-white" : "opacity-60",
+                              )}
+                           />
+                        </button>
+                     </ActionTooltip>
                   </div>
                )}
 
                {mode === "archive" && (
-                  <button
-                     type="button"
-                     onClick={(e) => {
-                        e.stopPropagation();
-                        onRestore?.(habit.id);
-                     }}
-                     className="p-1.5 rounded-lg bg-white/70 hover:bg-white text-muted-foreground hover:text-primary transition-colors shadow-2xs"
-                     title="Restore Habit"
-                  >
-                     <RotateCcw className="h-4 w-4" />
-                  </button>
+                  <ActionTooltip content="Restore Habit">
+                     <button
+                        type="button"
+                        onClick={(e) => {
+                           e.stopPropagation();
+                           onRestore?.(habit.id);
+                        }}
+                        className="p-1.5 rounded-lg bg-white/70 hover:bg-white text-muted-foreground hover:text-primary transition-colors shadow-2xs cursor-pointer"
+                        aria-label="Restore Habit"
+                     >
+                        <RotateCcw className="h-4 w-4" />
+                     </button>
+                  </ActionTooltip>
                )}
 
                {mode === "trash" && (
-                  <button
-                     type="button"
-                     onClick={(e) => {
-                        e.stopPropagation();
-                        onDeletePermanent?.(habit.id);
-                     }}
-                     className="p-1.5 rounded-lg bg-white/70 hover:bg-white text-muted-foreground hover:text-destructive transition-colors shadow-2xs"
-                     title="Permanently Delete"
-                  >
-                     <Trash2 className="h-4 w-4" />
-                  </button>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                     <ActionTooltip content="Restore Habit">
+                        <button
+                           type="button"
+                           onClick={(e) => {
+                              e.stopPropagation();
+                              onRestore?.(habit.id);
+                           }}
+                           className="p-1.5 rounded-lg bg-white/70 hover:bg-white text-muted-foreground hover:text-primary transition-colors shadow-2xs cursor-pointer"
+                           aria-label="Restore Habit"
+                        >
+                           <RotateCcw className="h-4 w-4" />
+                        </button>
+                     </ActionTooltip>
+                     <ActionTooltip content="Permanently Delete">
+                        <button
+                           type="button"
+                           onClick={(e) => {
+                              e.stopPropagation();
+                              onDeletePermanent?.(habit.id);
+                           }}
+                           className="p-1.5 rounded-lg bg-white/70 hover:bg-white text-muted-foreground hover:text-destructive transition-colors shadow-2xs cursor-pointer"
+                           aria-label="Permanently Delete"
+                        >
+                           <Trash2 className="h-4 w-4" />
+                        </button>
+                     </ActionTooltip>
+                  </div>
                )}
             </div>
 

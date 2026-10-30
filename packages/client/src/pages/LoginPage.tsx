@@ -36,20 +36,25 @@ export const LoginPage = () => {
 
    const onSubmit = async (values: LoginFormValues) => {
       setServerError(null);
-      try {
-         await login(values);
-         toast.success("Welcome back!");
-         navigate(fromLocation, { replace: true });
-      } catch (err: unknown) {
-         const errorObj = err as {
-            message?: string;
-            details?: Record<string, string>;
-         };
-         const message =
-            errorObj.message ||
-            "Failed to log in. Please check your credentials.";
-         setServerError(message);
-      }
+      const loginPromise = login(values);
+      toast.promise(loginPromise, {
+         loading: "Authenticating your account...",
+         success: () => {
+            navigate(fromLocation, { replace: true });
+            return "Welcome back! Successfully signed in.";
+         },
+         error: (err: unknown) => {
+            const errorObj = err as {
+               message?: string;
+               details?: Record<string, string>;
+            };
+            const message =
+               errorObj.message ||
+               "Failed to log in. Please check your credentials.";
+            setServerError(message);
+            return message;
+         },
+      });
    };
 
    const handleDemoSignIn = async () => {

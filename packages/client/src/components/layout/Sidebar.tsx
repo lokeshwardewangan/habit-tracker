@@ -1,6 +1,7 @@
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { Plus, LogOut, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ActionTooltip } from "@/components/ui/tooltip";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { NAV_ITEMS } from "@/constants/navigation";
@@ -59,7 +60,7 @@ export const Sidebar = ({
                {onClose && (
                   <button
                      onClick={onClose}
-                     className="rounded-lg p-1.5 text-muted-foreground hover:bg-sidebar-accent md:hidden"
+                     className="rounded-lg p-1.5 text-muted-foreground hover:bg-sidebar-accent md:hidden cursor-pointer"
                      aria-label="Close menu"
                   >
                      <X className="h-5 w-5" />
@@ -93,7 +94,7 @@ export const Sidebar = ({
                <div className="pt-2 px-1">
                   <Button
                      onClick={onOpenCreateModal}
-                     className="w-full h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-sm flex items-center justify-center gap-2 text-sm"
+                     className="w-full h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-sm flex items-center justify-center gap-2 text-sm cursor-pointer"
                   >
                      <Plus className="h-4 w-4 stroke-[3]" />
                      <span>Create New Habit</span>
@@ -121,14 +122,16 @@ export const Sidebar = ({
                      </div>
                   </Link>
 
-                  <button
-                     type="button"
-                     onClick={handleLogout}
-                     className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
-                     title="Sign Out"
-                  >
-                     <LogOut className="h-4 w-4" />
-                  </button>
+                  <ActionTooltip content="Sign Out">
+                     <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+                        aria-label="Sign Out"
+                     >
+                        <LogOut className="h-4 w-4" />
+                     </button>
+                  </ActionTooltip>
                </div>
             </div>
          </aside>

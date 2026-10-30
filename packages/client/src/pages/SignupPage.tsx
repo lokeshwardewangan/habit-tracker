@@ -32,19 +32,25 @@ export const SignupPage = () => {
 
    const onSubmit = async (values: SignupFormValues) => {
       setServerError(null);
-      try {
-         await signup(values);
-         toast.success("Account created successfully! Welcome aboard.");
-         navigate("/home", { replace: true });
-      } catch (err: unknown) {
-         const errorObj = err as {
-            message?: string;
-            details?: Record<string, string>;
-         };
-         const message =
-            errorObj.message || "Failed to create account. Please try again.";
-         setServerError(message);
-      }
+      const signupPromise = signup(values);
+      toast.promise(signupPromise, {
+         loading: "Creating your HabitPulse account...",
+         success: () => {
+            navigate("/home", { replace: true });
+            return "Account created successfully! Welcome aboard.";
+         },
+         error: (err: unknown) => {
+            const errorObj = err as {
+               message?: string;
+               details?: Record<string, string>;
+            };
+            const message =
+               errorObj.message ||
+               "Failed to create account. Please try again.";
+            setServerError(message);
+            return message;
+         },
+      });
    };
 
    return (
