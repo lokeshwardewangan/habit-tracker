@@ -8,7 +8,8 @@
       "dev": "bun --watch src/index.ts",
       "build": "bun build src/index.ts --outdir dist --target=bun",
       "typecheck": "tsc --noEmit",
-      "test": "bun test"
+      "test": "bun test",
+      "seed": "bun run src/scripts/seed.ts"
    },
    "devDependencies": {
       "@types/bcryptjs": "^3.0.0",
