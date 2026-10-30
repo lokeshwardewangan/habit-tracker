@@ -25,6 +25,8 @@ services:
       container_name: habitpulse-client
       ports:
          - "5173:5173"
+      environment:
+         - VITE_PROXY_TARGET=http://server:5000
       depends_on:
          - server
 
