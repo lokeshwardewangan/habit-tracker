@@ -28,6 +28,7 @@ import {
    useToggleCompletion,
    useCreateHabit,
    useArchiveHabit,
+   useTrashHabit,
 } from "@/hooks/useHabits";
 import { toast } from "sonner";
 import { PASTEL_COLORS, STARTER_HABITS } from "@/constants/habits";
@@ -54,6 +55,7 @@ export const HomePage = () => {
    const toggleCompletion = useToggleCompletion();
    const createHabit = useCreateHabit();
    const archiveHabit = useArchiveHabit();
+   const trashHabit = useTrashHabit();
 
    // Optimistic completion override state for instant UI feedback
    const [optimisticOverrides, setOptimisticOverrides] = useState<
@@ -251,51 +253,56 @@ export const HomePage = () => {
                </div>
             </div>
 
-            {/* Active Routines */}
+            {/* Overall Consistency */}
             <div className="rounded-2xl border border-border bg-card p-5 shadow-2xs space-y-3">
                <div className="flex items-center justify-between text-muted-foreground text-xs font-semibold">
-                  <span>Active Routines</span>
-                  <Flame className="h-4 w-4 text-amber-500 fill-amber-500" />
-               </div>
-               <div className="text-2xl font-black text-foreground">
-                  {serverHabits.length}
-               </div>
-               <div className="text-xs text-muted-foreground">
-                  {activeList.length} remaining for today
-               </div>
-            </div>
-
-            {/* Consistency Rate */}
-            <div className="rounded-2xl border border-border bg-card p-5 shadow-2xs space-y-3">
-               <div className="flex items-center justify-between text-muted-foreground text-xs font-semibold">
-                  <span>Completion Rate</span>
+                  <span>Period Completion</span>
                   <TrendingUp className="h-4 w-4 text-primary" />
                </div>
-               <div className="text-2xl font-black text-foreground">
-                  {stats?.completionRate
-                     ? `${stats.completionRate}%`
-                     : `${completionRate}%`}
+               <div className="flex items-baseline justify-between">
+                  <div className="text-2xl font-black text-foreground">
+                     {stats ? `${Math.round(stats.completionRate)}%` : "0%"}
+                  </div>
+                  <span className="text-xs font-semibold text-muted-foreground">
+                     trailing 7 days
+                  </span>
                </div>
-               <div className="text-xs text-muted-foreground">
-                  Calculated dynamically from MongoDB
+               <p className="text-xs text-muted-foreground font-medium">
+                  {stats?.totalCompletionsInPeriod || 0} completions recorded
+               </p>
+            </div>
+
+            {/* Streak & Consistency */}
+            <div className="rounded-2xl border border-border bg-card p-5 shadow-2xs space-y-3">
+               <div className="flex items-center justify-between text-muted-foreground text-xs font-semibold">
+                  <span>Active Streaks</span>
+                  <Flame className="h-4 w-4 text-amber-500" />
                </div>
+               <div className="flex items-baseline justify-between">
+                  <div className="text-2xl font-black text-amber-500">
+                     {stats?.activeHabits
+                        ? `${stats.activeHabits} Habits`
+                        : "0"}
+                  </div>
+                  <span className="text-xs font-semibold text-muted-foreground">
+                     in routine
+                  </span>
+               </div>
+               <p className="text-xs text-muted-foreground font-medium">
+                  Consistency builds lasting habits
+               </p>
             </div>
          </div>
 
-         {/* 7-Day Consistency Analytics Chart (Recharts) */}
-         <WeeklyConsistencyChart
-            stats={stats}
-            completedTodayCount={completedList.length}
-         />
+         {/* Weekly Consistency Visual Chart */}
+         <WeeklyConsistencyChart />
 
-         {/* Habits Workspace Section */}
+         {/* Workspace Routine Collection Header */}
          <div className="space-y-4">
-            {/* Filter and Search Bar */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2">
-               {/* Segmented Filter Controls */}
-               <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/60 border border-border/60 w-fit">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border">
+               {/* Filter Tabs */}
+               <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/60 w-fit">
                   <button
-                     type="button"
                      onClick={() => setFilterTab("all")}
                      className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         filterTab === "all"
@@ -303,10 +310,9 @@ export const HomePage = () => {
                            : "text-muted-foreground hover:text-foreground"
                      }`}
                   >
-                     All ({totalCount})
+                     All ({habitItems.length})
                   </button>
                   <button
-                     type="button"
                      onClick={() => setFilterTab("active")}
                      className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         filterTab === "active"
@@ -317,7 +323,6 @@ export const HomePage = () => {
                      Active ({activeList.length})
                   </button>
                   <button
-                     type="button"
                      onClick={() => setFilterTab("completed")}
                      className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         filterTab === "completed"
@@ -361,6 +366,7 @@ export const HomePage = () => {
                         onToggleComplete={handleToggleComplete}
                         onCardClick={handleCardClick}
                         onArchive={(id: string) => archiveHabit.mutate(id)}
+                        onTrash={(id: string) => trashHabit.mutate(id)}
                      />
                   ))}
                </div>

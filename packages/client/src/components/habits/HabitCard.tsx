@@ -17,6 +17,7 @@ interface HabitCardProps {
    onRestore?: (id: string) => void;
    onDeletePermanent?: (id: string) => void;
    onArchive?: (id: string) => void;
+   onTrash?: (id: string) => void;
    onCardClick?: (id: string) => void;
    onClick?: () => void;
 }
@@ -28,6 +29,7 @@ export const HabitCard = ({
    onRestore,
    onDeletePermanent,
    onArchive,
+   onTrash,
    onCardClick,
    onClick,
 }: HabitCardProps) => {
@@ -75,6 +77,21 @@ export const HabitCard = ({
                            </button>
                         </ActionTooltip>
                      )}
+                     {onTrash && (
+                        <ActionTooltip content="Move to Trash">
+                           <button
+                              type="button"
+                              onClick={(e) => {
+                                 e.stopPropagation();
+                                 onTrash(habit.id);
+                              }}
+                              className="flex h-7 w-7 items-center justify-center rounded-lg border border-transparent hover:border-border/60 hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all cursor-pointer"
+                              aria-label="Move to Trash"
+                           >
+                              <Trash2 className="h-3.5 w-3.5" />
+                           </button>
+                        </ActionTooltip>
+                     )}
                      <ActionTooltip
                         content={
                            isCompleted ? "Mark incomplete" : "Mark as completed"
@@ -106,19 +123,36 @@ export const HabitCard = ({
                )}
 
                {mode === "archive" && (
-                  <ActionTooltip content="Restore Habit">
-                     <button
-                        type="button"
-                        onClick={(e) => {
-                           e.stopPropagation();
-                           onRestore?.(habit.id);
-                        }}
-                        className="p-1.5 rounded-lg bg-white/70 hover:bg-white text-muted-foreground hover:text-primary transition-colors shadow-2xs cursor-pointer"
-                        aria-label="Restore Habit"
-                     >
-                        <RotateCcw className="h-4 w-4" />
-                     </button>
-                  </ActionTooltip>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                     <ActionTooltip content="Restore Habit">
+                        <button
+                           type="button"
+                           onClick={(e) => {
+                              e.stopPropagation();
+                              onRestore?.(habit.id);
+                           }}
+                           className="p-1.5 rounded-lg bg-white/70 hover:bg-white text-muted-foreground hover:text-primary transition-colors shadow-2xs cursor-pointer"
+                           aria-label="Restore Habit"
+                        >
+                           <RotateCcw className="h-4 w-4" />
+                        </button>
+                     </ActionTooltip>
+                     {onTrash && (
+                        <ActionTooltip content="Move to Trash">
+                           <button
+                              type="button"
+                              onClick={(e) => {
+                                 e.stopPropagation();
+                                 onTrash(habit.id);
+                              }}
+                              className="p-1.5 rounded-lg bg-white/70 hover:bg-white text-muted-foreground hover:text-destructive transition-colors shadow-2xs cursor-pointer"
+                              aria-label="Move to Trash"
+                           >
+                              <Trash2 className="h-4 w-4" />
+                           </button>
+                        </ActionTooltip>
+                     )}
+                  </div>
                )}
 
                {mode === "trash" && (

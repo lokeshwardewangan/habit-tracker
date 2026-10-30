@@ -1,15 +1,18 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Archive as ArchiveIcon, Loader2 } from "lucide-react";
 import { TopSearchHeader } from "@/components/layout/TopSearchHeader";
 import { HabitCard } from "@/components/habits/HabitCard";
 import type { HabitItem } from "@/types/habit";
-import { useHabits, useUnarchiveHabit } from "@/hooks/useHabits";
+import { useHabits, useUnarchiveHabit, useTrashHabit } from "@/hooks/useHabits";
 import { PASTEL_COLORS } from "@/constants/habits";
 
 export const ArchivePage = () => {
+   const navigate = useNavigate();
    const [searchQuery, setSearchQuery] = useState("");
    const { data: serverArchived = [], isLoading } = useHabits("archived");
    const unarchiveMutation = useUnarchiveHabit();
+   const trashMutation = useTrashHabit();
 
    const habitItems: HabitItem[] = useMemo(() => {
       return serverArchived.map((h, idx) => ({
@@ -22,7 +25,8 @@ export const ArchivePage = () => {
          repeat: h.frequency === "WEEKLY" ? "Weekly" : "Daily",
          colour: PASTEL_COLORS[idx % PASTEL_COLORS.length],
          status: "Archived",
-         labels: ["Archived Routine"],
+         labels:
+            h.labels && h.labels.length > 0 ? h.labels : ["Archived Routine"],
          streak: 0,
       }));
    }, [serverArchived]);
@@ -37,6 +41,10 @@ export const ArchivePage = () => {
 
    const handleRestore = (id: string) => {
       unarchiveMutation.mutate(id);
+   };
+
+   const handleTrash = (id: string) => {
+      trashMutation.mutate(id);
    };
 
    return (
@@ -79,6 +87,8 @@ export const ArchivePage = () => {
                      habit={habit}
                      mode="archive"
                      onRestore={handleRestore}
+                     onTrash={handleTrash}
+                     onCardClick={(id) => navigate(`/habits/${id}`)}
                   />
                ))}
             </div>
