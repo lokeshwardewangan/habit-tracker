@@ -68,6 +68,8 @@ VITE_API_URL=https://habit-pulse-lokeshwar-api.vercel.app
 
 ## 🚀 Local Development Setup
 
+### Option A: Using Bun (Local)
+
 Prerequisites: [Bun](https://bun.sh/) (v1.2+) and MongoDB.
 
 ```bash
@@ -81,6 +83,20 @@ bun install
 # 3. Start full-stack application concurrently (server on :5000, client on :5173)
 bun run dev
 ```
+
+### Option B: Quick Evaluation via Docker Compose (Frontend + Backend + MongoDB)
+
+If you have Docker installed and want to evaluate the application with zero manual setup:
+
+```bash
+docker compose up --build
+```
+
+- **Frontend App:** [http://localhost:5173](http://localhost:5173)
+- **Backend API:** [http://localhost:5000](http://localhost:5000)
+- **MongoDB Database:** `localhost:27017`
+
+_(Tip: To spin up only MongoDB in Docker and run the app with local Bun: `docker compose up mongo -d && bun run dev`)_
 
 ---
 
