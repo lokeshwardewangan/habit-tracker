@@ -1,6 +1,5 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Archive, Edit3, Trash2, ArrowLeft, Loader2 } from "lucide-react";
-import { initialHabits } from "@/mock/staticData";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useHabit, useArchiveHabit, useDeleteHabit } from "@/hooks/useHabits";
@@ -12,14 +11,41 @@ export const HabitDetailPage = () => {
    const archiveMutation = useArchiveHabit();
    const deleteMutation = useDeleteHabit();
 
-   // Fallback to static mock if server habit is not found
-   const fallbackHabit =
-      initialHabits.find((h) => h.id === id) || initialHabits[0];
+   if (isLoading) {
+      return (
+         <div className="py-20 flex flex-col items-center justify-center gap-3">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-xs text-muted-foreground font-semibold">
+               Loading habit details...
+            </p>
+         </div>
+      );
+   }
 
-   const title = serverHabit?.name || fallbackHabit.title;
-   const startDate = serverHabit?.startDate || fallbackHabit.startDate;
-   const repeat = serverHabit?.frequency === "WEEKLY" ? "Weekly" : "Daily";
-   const status = serverHabit?.status || fallbackHabit.status;
+   if (!serverHabit) {
+      return (
+         <div className="py-20 flex flex-col items-center justify-center gap-4 text-center">
+            <p className="text-base font-bold text-foreground">
+               Habit not found or deleted
+            </p>
+            <p className="text-xs text-muted-foreground">
+               This routine may have been removed or does not exist.
+            </p>
+            <Button
+               onClick={() => navigate("/home")}
+               className="rounded-xl"
+               size="sm"
+            >
+               Return to Dashboard
+            </Button>
+         </div>
+      );
+   }
+
+   const title = serverHabit.name;
+   const startDate = serverHabit.startDate;
+   const repeat = serverHabit.frequency === "WEEKLY" ? "Weekly" : "Daily";
+   const status = serverHabit.status === "ACTIVE" ? "Active" : "Archived";
 
    const handleArchive = async () => {
       if (id) {
@@ -34,17 +60,6 @@ export const HabitDetailPage = () => {
          navigate("/home");
       }
    };
-
-   if (isLoading) {
-      return (
-         <div className="py-20 flex flex-col items-center justify-center gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-xs text-muted-foreground font-semibold">
-               Loading habit details...
-            </p>
-         </div>
-      );
-   }
 
    return (
       <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in-50 duration-200">

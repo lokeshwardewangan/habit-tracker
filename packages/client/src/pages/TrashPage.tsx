@@ -2,15 +2,12 @@ import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { TopSearchHeader } from "@/components/layout/TopSearchHeader";
 import { HabitCard } from "@/components/habits/HabitCard";
-import { initialHabits } from "@/mock/staticData";
 import type { HabitItem } from "@/types/habit";
 import { useDeleteHabit } from "@/hooks/useHabits";
 
 export const TrashPage = () => {
    const [searchQuery, setSearchQuery] = useState("");
-   const [trashHabits, setTrashHabits] = useState<HabitItem[]>(
-      initialHabits.filter((h) => h.status === "Trash"),
-   );
+   const [trashHabits, setTrashHabits] = useState<HabitItem[]>([]);
    const deleteMutation = useDeleteHabit();
 
    const handleDeletePermanent = (id: string) => {

@@ -19,8 +19,13 @@ import {
    Check,
    Calendar as CalendarIcon,
    Loader2,
+   Archive,
 } from "lucide-react";
-import { useHabitCompletions, useToggleCompletion } from "@/hooks/useHabits";
+import {
+   useHabitCompletions,
+   useToggleCompletion,
+   useArchiveHabit,
+} from "@/hooks/useHabits";
 import { Button } from "@/components/ui/button";
 import type { Habit } from "@/types/api";
 
@@ -37,6 +42,7 @@ export const CalendarHistoryModal = ({
 }: CalendarHistoryModalProps) => {
    const [currentMonth, setCurrentMonth] = useState<Date>(() => new Date());
    const toggleCompletion = useToggleCompletion();
+   const archiveHabit = useArchiveHabit();
 
    const monthStart = startOfMonth(currentMonth);
    const monthEnd = endOfMonth(currentMonth);
@@ -68,6 +74,13 @@ export const CalendarHistoryModal = ({
       });
    };
 
+   const handleArchive = () => {
+      if (habit) {
+         archiveHabit.mutate(habit.id);
+         onClose();
+      }
+   };
+
    return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-xs">
          <div className="w-full max-w-lg rounded-3xl border border-border bg-card p-6 sm:p-7 shadow-xl animate-in fade-in-0 zoom-in-95 duration-200">
@@ -86,13 +99,25 @@ export const CalendarHistoryModal = ({
                      </p>
                   </div>
                </div>
-               <button
-                  type="button"
-                  onClick={onClose}
-                  className="rounded-xl p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
-               >
-                  <X className="h-5 w-5" />
-               </button>
+               <div className="flex items-center gap-2">
+                  <Button
+                     variant="outline"
+                     size="sm"
+                     onClick={handleArchive}
+                     className="h-8 gap-1.5 rounded-xl border-border text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+                     title="Archive Routine"
+                  >
+                     <Archive className="h-3.5 w-3.5" />
+                     <span>Archive</span>
+                  </Button>
+                  <button
+                     type="button"
+                     onClick={onClose}
+                     className="rounded-xl p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+                  >
+                     <X className="h-5 w-5" />
+                  </button>
+               </div>
             </div>
 
             {/* Month Navigation */}

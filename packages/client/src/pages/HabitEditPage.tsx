@@ -1,17 +1,11 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import { initialHabits } from "@/mock/staticData";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type {
-   HabitRepeat,
-   HabitColor,
-   HabitStatus,
-   HabitItem,
-} from "@/types/habit";
+import type { HabitRepeat, HabitColor, HabitStatus } from "@/types/habit";
 import { useHabit, useUpdateHabit } from "@/hooks/useHabits";
 
 interface EditFormProps {
@@ -205,24 +199,6 @@ export const HabitEditPage = () => {
    const navigate = useNavigate();
    const { data: serverHabit, isLoading } = useHabit(id);
 
-   const fallbackHabit: HabitItem =
-      initialHabits.find((h) => h.id === id) || initialHabits[0];
-
-   const formData = {
-      title: serverHabit?.name || fallbackHabit.title,
-      startDate: serverHabit?.startDate || fallbackHabit.startDate,
-      endDate: serverHabit?.startDate || fallbackHabit.endDate,
-      goalTimes: fallbackHabit.goalTimes,
-      repeat: (serverHabit?.frequency === "WEEKLY"
-         ? "Weekly"
-         : "Daily") as HabitRepeat,
-      colour: fallbackHabit.colour,
-      status: (serverHabit?.status === "ACTIVE"
-         ? "Active"
-         : "Archived") as HabitStatus,
-      labels: fallbackHabit.labels,
-   };
-
    if (isLoading) {
       return (
          <div className="py-20 flex flex-col items-center justify-center gap-3">
@@ -233,6 +209,41 @@ export const HabitEditPage = () => {
          </div>
       );
    }
+
+   if (!serverHabit || !id) {
+      return (
+         <div className="py-20 flex flex-col items-center justify-center gap-4 text-center">
+            <p className="text-base font-bold text-foreground">
+               Habit not found or deleted
+            </p>
+            <p className="text-xs text-muted-foreground">
+               This routine cannot be edited because it does not exist.
+            </p>
+            <Button
+               onClick={() => navigate("/home")}
+               className="rounded-xl"
+               size="sm"
+            >
+               Return to Dashboard
+            </Button>
+         </div>
+      );
+   }
+
+   const formData = {
+      title: serverHabit.name,
+      startDate: serverHabit.startDate,
+      endDate: serverHabit.startDate,
+      goalTimes: 1,
+      repeat: (serverHabit.frequency === "WEEKLY"
+         ? "Weekly"
+         : "Daily") as HabitRepeat,
+      colour: "blue" as HabitColor,
+      status: (serverHabit.status === "ACTIVE"
+         ? "Active"
+         : "Archived") as HabitStatus,
+      labels: ["Daily Routine"],
+   };
 
    return (
       <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in-50 duration-200">
@@ -255,11 +266,7 @@ export const HabitEditPage = () => {
          {/* Edit Form */}
          <Card className="rounded-2xl border-border bg-card shadow-xs">
             <CardContent className="p-6 md:p-8">
-               <EditForm
-                  key={serverHabit?.id || "fallback"}
-                  id={id || fallbackHabit.id}
-                  initialData={formData}
-               />
+               <EditForm key={serverHabit.id} id={id} initialData={formData} />
             </CardContent>
          </Card>
       </div>

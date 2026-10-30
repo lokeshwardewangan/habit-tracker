@@ -2,6 +2,7 @@ import {
    Check,
    RotateCcw,
    Trash2,
+   Archive,
    Calendar as CalendarIcon,
 } from "lucide-react";
 import type { HabitItem } from "@/types/habit";
@@ -25,7 +26,7 @@ export const HabitCard = ({
    onToggleComplete,
    onRestore,
    onDeletePermanent,
-   onArchive: _onArchive,
+   onArchive,
    onCardClick,
    onClick,
 }: HabitCardProps) => {
@@ -57,25 +58,41 @@ export const HabitCard = ({
 
                {/* Mode-specific Top-Right Action Button */}
                {mode === "home" && (
-                  <button
-                     type="button"
-                     onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleComplete?.(habit.id);
-                     }}
-                     className={cn(
-                        "flex h-7 w-7 items-center justify-center rounded-full border transition-transform active:scale-90 bg-white/80 dark:bg-black/30 shadow-2xs",
-                        isCompleted ? style.checkBg : style.checkBorder,
+                  <div className="flex items-center gap-1.5 shrink-0">
+                     {onArchive && (
+                        <button
+                           type="button"
+                           onClick={(e) => {
+                              e.stopPropagation();
+                              onArchive(habit.id);
+                           }}
+                           className="flex h-7 w-7 items-center justify-center rounded-lg border border-transparent hover:border-border/60 hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+                           title="Archive Habit"
+                           aria-label="Archive Habit"
+                        >
+                           <Archive className="h-3.5 w-3.5" />
+                        </button>
                      )}
-                     title={isCompleted ? "Completed" : "Mark as completed"}
-                  >
-                     <Check
+                     <button
+                        type="button"
+                        onClick={(e) => {
+                           e.stopPropagation();
+                           onToggleComplete?.(habit.id);
+                        }}
                         className={cn(
-                           "h-4 w-4 stroke-[3]",
-                           isCompleted ? "text-white" : "opacity-60",
+                           "flex h-7 w-7 items-center justify-center rounded-full border transition-transform active:scale-90 bg-white/80 dark:bg-black/30 shadow-2xs cursor-pointer",
+                           isCompleted ? style.checkBg : style.checkBorder,
                         )}
-                     />
-                  </button>
+                        title={isCompleted ? "Completed" : "Mark as completed"}
+                     >
+                        <Check
+                           className={cn(
+                              "h-4 w-4 stroke-[3]",
+                              isCompleted ? "text-white" : "opacity-60",
+                           )}
+                        />
+                     </button>
+                  </div>
                )}
 
                {mode === "archive" && (
