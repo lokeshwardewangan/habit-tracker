@@ -7,6 +7,7 @@
       "start": "bun run src/index.ts",
       "dev": "bun --watch src/index.ts",
       "build": "bun build src/index.ts --outdir dist --target=bun",
+      "typecheck": "tsc --noEmit",
       "test": "bun test"
    },
    "devDependencies": {
@@ -15,6 +16,7 @@
       "@types/cookie-parser": "^1.4.10",
       "@types/cors": "^2.8.19",
       "@types/jsonwebtoken": "^9.0.10",
+      "@types/node": "^22.13.4",
       "@types/supertest": "^7.2.1",
       "mongodb-memory-server": "^11.3.0",
       "supertest": "^7.3.1"

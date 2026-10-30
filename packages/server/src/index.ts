@@ -2,6 +2,13 @@ import { app } from "./app.js";
 import { connectDB, disconnectDB } from "./config/db.js";
 import { env } from "./config/env.js";
 
+// Ensure DB connection is established for serverless environments
+if (process.env.VERCEL === "1") {
+   connectDB().catch((err) => {
+      console.error("Vercel cold start DB connection error:", err);
+   });
+}
+
 const startServer = async () => {
    try {
       await connectDB();
@@ -28,4 +35,9 @@ const startServer = async () => {
    }
 };
 
-startServer();
+if (process.env.VERCEL !== "1") {
+   startServer();
+}
+
+export default app;
+export { app };
