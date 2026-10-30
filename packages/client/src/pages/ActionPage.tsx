@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { format } from "date-fns";
 import {
    Play,
    Pause,
@@ -7,9 +8,12 @@ import {
    Zap,
    Coffee,
    CheckCircle2,
+   Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ActionTooltip } from "@/components/ui/tooltip";
+import { useHabits, useToggleCompletion } from "@/hooks/useHabits";
 import { toast } from "sonner";
 
 export const ActionPage = () => {
@@ -17,6 +21,32 @@ export const ActionPage = () => {
    const [timeLeft, setTimeLeft] = useState(25 * 60);
    const [isRunning, setIsRunning] = useState(false);
    const [sessionsCompleted, setSessionsCompleted] = useState(0);
+
+   const { data: habits = [] } = useHabits("active");
+   const toggleCompletion = useToggleCompletion();
+   const [selectedHabitId, setSelectedHabitId] = useState<string>("");
+   const [todayDateStr] = useState<string>(() =>
+      format(new Date(), "yyyy-MM-dd"),
+   );
+
+   const handleSessionComplete = useCallback(() => {
+      setSessionsCompleted((count) => count + 1);
+      if (selectedHabitId) {
+         const habit = habits.find((h) => h.id === selectedHabitId);
+         const promise = toggleCompletion.mutateAsync({
+            habitId: selectedHabitId,
+            date: todayDateStr,
+            completed: false,
+         });
+         toast.promise(promise, {
+            loading: `Recording completion for ${habit?.name || "routine"}...`,
+            success: `Focus session recorded! ${habit?.name || "Routine"} checked off for today.`,
+            error: "Failed to record routine completion",
+         });
+      } else {
+         toast.success("Focus session finished! Time for a short break.");
+      }
+   }, [selectedHabitId, habits, todayDateStr, toggleCompletion]);
 
    useEffect(() => {
       if (!isRunning) return;
@@ -26,10 +56,7 @@ export const ActionPage = () => {
             if (prev <= 1) {
                setIsRunning(false);
                if (mode === "focus") {
-                  setSessionsCompleted((count) => count + 1);
-                  toast.success(
-                     "Focus session finished! Time for a short break.",
-                  );
+                  handleSessionComplete();
                   setMode("break");
                   return 5 * 60;
                } else {
@@ -43,7 +70,7 @@ export const ActionPage = () => {
       }, 1000);
 
       return () => clearInterval(interval);
-   }, [isRunning, mode]);
+   }, [isRunning, mode, handleSessionComplete]);
 
    const togglePlay = () => setIsRunning((prev) => !prev);
 
@@ -120,6 +147,30 @@ export const ActionPage = () => {
 
          {/* Timer Card */}
          <Card className="rounded-3xl border border-border bg-card p-8 sm:p-12 shadow-sm text-center space-y-8">
+            {/* Pair with Routine selector */}
+            {habits.length > 0 && mode === "focus" && (
+               <div className="flex flex-wrap items-center justify-center gap-2 text-xs">
+                  <div className="flex items-center gap-1.5 font-semibold text-muted-foreground">
+                     <Target className="h-3.5 w-3.5 text-primary" />
+                     <span>Focus routine:</span>
+                  </div>
+                  <select
+                     value={selectedHabitId}
+                     onChange={(e) => setSelectedHabitId(e.target.value)}
+                     className="bg-muted/50 border border-border rounded-xl px-3 py-1 font-medium text-foreground text-xs outline-none cursor-pointer hover:bg-muted transition-colors"
+                  >
+                     <option value="">
+                        Independent Session (No habit linked)
+                     </option>
+                     {habits.map((h) => (
+                        <option key={h.id} value={h.id}>
+                           {h.name} {h.isCompletedToday ? "✓ (Done today)" : ""}
+                        </option>
+                     ))}
+                  </select>
+               </div>
+            )}
+
             <div className="space-y-4">
                {/* Big Countdown Display */}
                <div className="text-7xl sm:text-8xl font-black tracking-tight font-mono text-foreground select-none">
@@ -135,7 +186,9 @@ export const ActionPage = () => {
                </div>
                <p className="text-xs text-muted-foreground font-semibold">
                   {mode === "focus"
-                     ? "Stay engaged with your routine"
+                     ? selectedHabitId
+                        ? `Focusing on: ${habits.find((h) => h.id === selectedHabitId)?.name || "Routine"}`
+                        : "Deep focus interval"
                      : "Relax and recharge"}
                </p>
             </div>
@@ -164,15 +217,17 @@ export const ActionPage = () => {
                   )}
                </Button>
 
-               <Button
-                  variant="outline"
-                  onClick={resetTimer}
-                  size="lg"
-                  className="h-14 px-5 rounded-2xl border-border text-muted-foreground hover:text-foreground cursor-pointer"
-                  title="Reset Timer"
-               >
-                  <RotateCcw className="h-5 w-5" />
-               </Button>
+               <ActionTooltip content="Reset Timer">
+                  <Button
+                     variant="outline"
+                     onClick={resetTimer}
+                     size="lg"
+                     className="h-14 px-5 rounded-2xl border-border text-muted-foreground hover:text-foreground cursor-pointer"
+                     aria-label="Reset Timer"
+                  >
+                     <RotateCcw className="h-5 w-5" />
+                  </Button>
+               </ActionTooltip>
             </div>
          </Card>
 

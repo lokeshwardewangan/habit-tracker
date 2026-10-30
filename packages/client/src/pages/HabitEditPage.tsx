@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { HabitRepeat, HabitColor, HabitStatus } from "@/types/habit";
 import { useHabit, useUpdateHabit } from "@/hooks/useHabits";
+import { useLabels } from "@/hooks/useLabels";
+import { ActionTooltip } from "@/components/ui/tooltip";
 
 interface EditFormProps {
    id: string;
@@ -25,6 +27,7 @@ interface EditFormProps {
 const EditForm = ({ id, initialData }: EditFormProps) => {
    const navigate = useNavigate();
    const updateMutation = useUpdateHabit();
+   const { availableLabels } = useLabels();
 
    const [title, setTitle] = useState(initialData.title);
    const [startDate, setStartDate] = useState(initialData.startDate);
@@ -34,6 +37,8 @@ const EditForm = ({ id, initialData }: EditFormProps) => {
    const [colour, setColour] = useState<HabitColor>(initialData.colour);
    const [status, setStatus] = useState<HabitStatus>(initialData.status);
    const [labels, setLabels] = useState<string[]>(initialData.labels);
+
+   const allLabels = Array.from(new Set([...availableLabels, ...labels]));
 
    const toggleLabel = (lbl: string) => {
       setLabels((prev) =>
@@ -48,6 +53,7 @@ const EditForm = ({ id, initialData }: EditFormProps) => {
          payload: {
             name: title,
             frequency: repeat === "Weekly" ? "WEEKLY" : "DAILY",
+            labels,
          },
       });
       navigate(`/habits/${id}`);
@@ -155,21 +161,27 @@ const EditForm = ({ id, initialData }: EditFormProps) => {
          {/* Labels */}
          <div className="space-y-2 pt-1">
             <Label>Labels</Label>
-            <div className="space-y-1.5">
-               {["Label 1", "Label 2"].map((lbl) => (
-                  <label
-                     key={lbl}
-                     className="flex items-center gap-2.5 text-sm cursor-pointer select-none"
-                  >
-                     <input
-                        type="checkbox"
-                        checked={labels.includes(lbl)}
-                        onChange={() => toggleLabel(lbl)}
-                        className="h-4 w-4 rounded border-input text-primary focus:ring-primary"
-                     />
-                     <span>{lbl}</span>
-                  </label>
-               ))}
+            <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+               {allLabels.length > 0 ? (
+                  allLabels.map((lbl) => (
+                     <label
+                        key={lbl}
+                        className="flex items-center gap-2.5 text-sm cursor-pointer select-none py-0.5 hover:text-foreground"
+                     >
+                        <input
+                           type="checkbox"
+                           checked={labels.includes(lbl)}
+                           onChange={() => toggleLabel(lbl)}
+                           className="h-4 w-4 rounded border-input text-primary focus:ring-primary cursor-pointer"
+                        />
+                        <span>{lbl}</span>
+                     </label>
+                  ))
+               ) : (
+                  <div className="text-xs text-muted-foreground py-1">
+                     No labels available.
+                  </div>
+               )}
             </div>
          </div>
 
@@ -242,22 +254,27 @@ export const HabitEditPage = () => {
       status: (serverHabit.status === "ACTIVE"
          ? "Active"
          : "Archived") as HabitStatus,
-      labels: ["Daily Routine"],
+      labels:
+         serverHabit.labels && serverHabit.labels.length > 0
+            ? serverHabit.labels
+            : ["Daily Routine"],
    };
 
    return (
       <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in-50 duration-200">
          {/* Top Header */}
          <div className="flex items-center gap-3 pb-3 border-b border-border">
-            <Button
-               variant="ghost"
-               size="icon-sm"
-               onClick={() => navigate(`/habits/${id}`)}
-               className="rounded-xl cursor-pointer"
-               title="Back"
-            >
-               <ArrowLeft className="h-4 w-4" />
-            </Button>
+            <ActionTooltip content="Back">
+               <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => navigate(`/habits/${id}`)}
+                  className="rounded-xl cursor-pointer"
+                  aria-label="Back"
+               >
+                  <ArrowLeft className="h-4 w-4" />
+               </Button>
+            </ActionTooltip>
             <h1 className="text-2xl font-black tracking-tight text-foreground">
                Edit Habit
             </h1>

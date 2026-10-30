@@ -2,14 +2,15 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { Archive, Edit3, Trash2, ArrowLeft, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useHabit, useArchiveHabit, useDeleteHabit } from "@/hooks/useHabits";
+import { useHabit, useArchiveHabit, useTrashHabit } from "@/hooks/useHabits";
+import { ActionTooltip } from "@/components/ui/tooltip";
 
 export const HabitDetailPage = () => {
    const { id } = useParams<{ id: string }>();
    const navigate = useNavigate();
    const { data: serverHabit, isLoading } = useHabit(id);
    const archiveMutation = useArchiveHabit();
-   const deleteMutation = useDeleteHabit();
+   const trashMutation = useTrashHabit();
 
    if (isLoading) {
       return (
@@ -28,12 +29,9 @@ export const HabitDetailPage = () => {
             <p className="text-base font-bold text-foreground">
                Habit not found or deleted
             </p>
-            <p className="text-xs text-muted-foreground">
-               This routine may have been removed or does not exist.
-            </p>
             <Button
                onClick={() => navigate("/home")}
-               className="rounded-xl"
+               className="rounded-xl cursor-pointer"
                size="sm"
             >
                Return to Dashboard
@@ -46,18 +44,22 @@ export const HabitDetailPage = () => {
    const startDate = serverHabit.startDate;
    const repeat = serverHabit.frequency === "WEEKLY" ? "Weekly" : "Daily";
    const status = serverHabit.status === "ACTIVE" ? "Active" : "Archived";
+   const habitLabels =
+      serverHabit.labels && serverHabit.labels.length > 0
+         ? serverHabit.labels
+         : ["Daily Routine"];
 
    const handleArchive = async () => {
       if (id) {
          await archiveMutation.mutateAsync(id);
-         navigate("/archive");
+         navigate("/home");
       }
    };
 
-   const handleDelete = async () => {
+   const handleTrash = async () => {
       if (id) {
-         await deleteMutation.mutateAsync(id);
-         navigate("/home");
+         await trashMutation.mutateAsync(id);
+         navigate("/trash");
       }
    };
 
@@ -66,15 +68,17 @@ export const HabitDetailPage = () => {
          {/* Top Header with Back button and Quick Actions */}
          <div className="flex items-center justify-between pb-3 border-b border-border">
             <div className="flex items-center gap-3">
-               <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => navigate("/home")}
-                  className="rounded-xl cursor-pointer"
-                  title="Back to Home"
-               >
-                  <ArrowLeft className="h-4 w-4" />
-               </Button>
+               <ActionTooltip content="Back to Home">
+                  <Button
+                     variant="ghost"
+                     size="icon-sm"
+                     onClick={() => navigate("/home")}
+                     className="rounded-xl cursor-pointer"
+                     aria-label="Back to Home"
+                  >
+                     <ArrowLeft className="h-4 w-4" />
+                  </Button>
+               </ActionTooltip>
                <h1 className="text-2xl font-black tracking-tight text-foreground">
                   My Habit
                </h1>
@@ -82,31 +86,37 @@ export const HabitDetailPage = () => {
 
             {/* Figma Top-Right Actions: Archive, Edit, Trash */}
             <div className="flex items-center gap-1.5">
-               <button
-                  type="button"
-                  onClick={handleArchive}
-                  disabled={archiveMutation.isPending}
-                  className="p-2 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
-                  title="Archive Habit"
-               >
-                  <Archive className="h-4 w-4" />
-               </button>
-               <Link
-                  to={`/habits/${id}/edit`}
-                  className="p-2 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                  title="Edit Habit"
-               >
-                  <Edit3 className="h-4 w-4" />
-               </Link>
-               <button
-                  type="button"
-                  onClick={handleDelete}
-                  disabled={deleteMutation.isPending}
-                  className="p-2 rounded-xl text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer"
-                  title="Move to Trash"
-               >
-                  <Trash2 className="h-4 w-4" />
-               </button>
+               <ActionTooltip content="Archive Habit">
+                  <button
+                     type="button"
+                     onClick={handleArchive}
+                     disabled={archiveMutation.isPending}
+                     className="p-2 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+                     aria-label="Archive Habit"
+                  >
+                     <Archive className="h-4 w-4" />
+                  </button>
+               </ActionTooltip>
+               <ActionTooltip content="Edit Habit">
+                  <Link
+                     to={`/habits/${id}/edit`}
+                     className="p-2 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                     aria-label="Edit Habit"
+                  >
+                     <Edit3 className="h-4 w-4" />
+                  </Link>
+               </ActionTooltip>
+               <ActionTooltip content="Move to Trash">
+                  <button
+                     type="button"
+                     onClick={handleTrash}
+                     disabled={trashMutation.isPending}
+                     className="p-2 rounded-xl text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer"
+                     aria-label="Move to Trash"
+                  >
+                     <Trash2 className="h-4 w-4" />
+                  </button>
+               </ActionTooltip>
             </div>
          </div>
 
@@ -190,10 +200,15 @@ export const HabitDetailPage = () => {
                      Labels
                   </div>
                   <div className="flex flex-wrap gap-2">
-                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border bg-muted/40 text-xs font-semibold text-foreground">
-                        <span className="h-2 w-2 rounded-full bg-primary" />
-                        <span>Daily Routine</span>
-                     </div>
+                     {habitLabels.map((lbl, idx) => (
+                        <div
+                           key={idx}
+                           className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border bg-muted/40 text-xs font-semibold text-foreground"
+                        >
+                           <span className="h-2 w-2 rounded-full bg-primary" />
+                           <span>{lbl}</span>
+                        </div>
+                     ))}
                   </div>
                </div>
             </CardContent>

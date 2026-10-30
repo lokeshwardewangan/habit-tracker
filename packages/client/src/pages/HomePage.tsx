@@ -17,6 +17,7 @@ import { NewHabitModal } from "@/components/habits/NewHabitModal";
 import { CalendarHistoryModal } from "@/components/habits/CalendarHistoryModal";
 import { WeeklyConsistencyChart } from "@/features/dashboard";
 import { exportHabitsToCsv } from "@/features/habits/utils/exportCsv";
+import { ActionTooltip } from "@/components/ui/tooltip";
 import type { HabitItem } from "@/types/habit";
 import type { Habit } from "@/types/api";
 import { format } from "date-fns";
@@ -54,15 +55,19 @@ export const HomePage = () => {
    const createHabit = useCreateHabit();
    const archiveHabit = useArchiveHabit();
 
-   // Local completion override state for instant UI feedback before refetch
-   const [completedTodayIds, setCompletedTodayIds] = useState<Set<string>>(
-      new Set(),
-   );
+   // Optimistic completion override state for instant UI feedback
+   const [optimisticOverrides, setOptimisticOverrides] = useState<
+      Record<string, boolean>
+   >({});
 
    // Map backend habits to UI habit items
    const habitItems: HabitItem[] = useMemo(() => {
       return serverHabits.map((h, idx) => {
-         const isCompletedToday = completedTodayIds.has(h.id);
+         const isCompletedToday =
+            optimisticOverrides[h.id] !== undefined
+               ? optimisticOverrides[h.id]
+               : !!h.isCompletedToday;
+
          return {
             id: h.id,
             title: h.name,
@@ -73,28 +78,34 @@ export const HomePage = () => {
             repeat: h.frequency === "WEEKLY" ? "Weekly" : "Daily",
             colour: PASTEL_COLORS[idx % PASTEL_COLORS.length],
             status: isCompletedToday ? "Completed" : "Active",
-            labels: [
-               h.frequency === "WEEKLY" ? "Weekly Routine" : "Daily Routine",
-            ],
+            labels:
+               h.labels && h.labels.length > 0
+                  ? h.labels
+                  : [
+                       h.frequency === "WEEKLY"
+                          ? "Weekly Routine"
+                          : "Daily Routine",
+                    ],
             streak: stats?.activeHabits || 1,
          };
       });
-   }, [serverHabits, completedTodayIds, stats]);
+   }, [serverHabits, optimisticOverrides, stats]);
 
    // Handle checkmark click: toggle completion on backend API
    const handleToggleComplete = async (habitId: string) => {
-      const isCurrentlyCompleted = completedTodayIds.has(habitId);
+      const habit = serverHabits.find((h) => h.id === habitId);
+      const isCurrentlyCompleted =
+         optimisticOverrides[habitId] !== undefined
+            ? optimisticOverrides[habitId]
+            : !!habit?.isCompletedToday;
+
+      const nextCompleted = !isCurrentlyCompleted;
 
       // Optimistic update
-      setCompletedTodayIds((prev) => {
-         const next = new Set(prev);
-         if (isCurrentlyCompleted) {
-            next.delete(habitId);
-         } else {
-            next.add(habitId);
-         }
-         return next;
-      });
+      setOptimisticOverrides((prev) => ({
+         ...prev,
+         [habitId]: nextCompleted,
+      }));
 
       try {
          await toggleCompletion.mutateAsync({
@@ -109,15 +120,10 @@ export const HomePage = () => {
          );
       } catch {
          // Rollback optimistic state
-         setCompletedTodayIds((prev) => {
-            const next = new Set(prev);
-            if (isCurrentlyCompleted) {
-               next.add(habitId);
-            } else {
-               next.delete(habitId);
-            }
-            return next;
-         });
+         setOptimisticOverrides((prev) => ({
+            ...prev,
+            [habitId]: isCurrentlyCompleted,
+         }));
       }
    };
 
@@ -192,19 +198,21 @@ export const HomePage = () => {
 
             {/* Quick action buttons */}
             <div className="flex items-center gap-2.5 shrink-0">
-               <Button
-                  variant="outline"
-                  onClick={() => {
-                     exportHabitsToCsv(serverHabits);
-                     toast.success("Habits exported to CSV!");
-                  }}
-                  disabled={serverHabits.length === 0}
-                  className="h-11 px-4 rounded-xl border-border font-semibold text-xs flex items-center gap-2 cursor-pointer hover:bg-accent"
-                  title="Export all habits data to CSV"
-               >
-                  <Download className="h-4 w-4" />
-                  <span className="hidden sm:inline">Export CSV</span>
-               </Button>
+               <ActionTooltip content="Export all habits data to CSV">
+                  <Button
+                     variant="outline"
+                     onClick={() => {
+                        exportHabitsToCsv(serverHabits);
+                        toast.success("Habits exported to CSV!");
+                     }}
+                     disabled={serverHabits.length === 0}
+                     className="h-11 px-4 rounded-xl border-border font-semibold text-xs flex items-center gap-2 cursor-pointer hover:bg-accent"
+                     aria-label="Export all habits data to CSV"
+                  >
+                     <Download className="h-4 w-4" />
+                     <span className="hidden sm:inline">Export CSV</span>
+                  </Button>
+               </ActionTooltip>
 
                <Button
                   onClick={() => setIsModalOpen(true)}
@@ -413,6 +421,7 @@ export const HomePage = () => {
                   name: habit.title,
                   startDate: todayDateStr,
                   frequency: habit.repeat === "Weekly" ? "WEEKLY" : "DAILY",
+                  labels: habit.labels,
                });
             }}
          />

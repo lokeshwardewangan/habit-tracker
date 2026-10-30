@@ -4,10 +4,14 @@ import { Menu, Plus } from "lucide-react";
 import { Sidebar } from "./Sidebar";
 import { NewHabitModal } from "@/components/habits/NewHabitModal";
 import { Button } from "@/components/ui/button";
+import { useCreateHabit } from "@/hooks/useHabits";
+import { format } from "date-fns";
+import { ActionTooltip } from "@/components/ui/tooltip";
 
 export const AppLayout = () => {
    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+   const createHabit = useCreateHabit();
 
    return (
       <div className="flex h-screen w-full bg-background overflow-hidden font-sans">
@@ -23,14 +27,16 @@ export const AppLayout = () => {
             {/* Mobile Header (visible only on md:hidden) */}
             <header className="flex md:hidden h-14 items-center justify-between px-4 border-b border-border bg-card/95 backdrop-blur-xs sticky top-0 z-30 shrink-0">
                <div className="flex items-center gap-2">
-                  <button
-                     type="button"
-                     onClick={() => setIsSidebarOpen(true)}
-                     className="p-2 -ml-1 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all"
-                     aria-label="Open navigation menu"
-                  >
-                     <Menu className="h-5 w-5" />
-                  </button>
+                  <ActionTooltip content="Open navigation menu">
+                     <button
+                        type="button"
+                        onClick={() => setIsSidebarOpen(true)}
+                        className="p-2 -ml-1 rounded-xl text-foreground hover:bg-muted active:scale-95 transition-all cursor-pointer"
+                        aria-label="Open navigation menu"
+                     >
+                        <Menu className="h-5 w-5" />
+                     </button>
+                  </ActionTooltip>
                   <Link
                      to="/home"
                      className="flex items-center gap-2 font-black text-xl tracking-tight text-primary"
@@ -42,7 +48,7 @@ export const AppLayout = () => {
                <Button
                   size="sm"
                   onClick={() => setIsCreateModalOpen(true)}
-                  className="h-8 px-3 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs gap-1.5 shadow-2xs"
+                  className="h-8 px-3 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs gap-1.5 shadow-2xs cursor-pointer"
                >
                   <Plus className="h-3.5 w-3.5 stroke-[3]" />
                   <span>New Habit</span>
@@ -60,8 +66,13 @@ export const AppLayout = () => {
          <NewHabitModal
             isOpen={isCreateModalOpen}
             onClose={() => setIsCreateModalOpen(false)}
-            onCreate={() => {
-               // When connected, will invalidate queries or push to state
+            onCreate={async (habit) => {
+               await createHabit.mutateAsync({
+                  name: habit.title,
+                  startDate: format(new Date(), "yyyy-MM-dd"),
+                  frequency: habit.repeat === "Weekly" ? "WEEKLY" : "DAILY",
+                  labels: habit.labels,
+               });
                setIsCreateModalOpen(false);
             }}
          />

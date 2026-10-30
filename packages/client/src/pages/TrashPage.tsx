@@ -1,27 +1,53 @@
-import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Trash2, Loader2 } from "lucide-react";
 import { TopSearchHeader } from "@/components/layout/TopSearchHeader";
 import { HabitCard } from "@/components/habits/HabitCard";
 import type { HabitItem } from "@/types/habit";
-import { useDeleteHabit } from "@/hooks/useHabits";
+import {
+   useHabits,
+   useDeleteHabit,
+   useRestoreFromTrash,
+} from "@/hooks/useHabits";
+import { PASTEL_COLORS } from "@/constants/habits";
 
 export const TrashPage = () => {
    const [searchQuery, setSearchQuery] = useState("");
-   const [trashHabits, setTrashHabits] = useState<HabitItem[]>([]);
+   const { data: serverTrashed = [], isLoading } = useHabits("trashed");
    const deleteMutation = useDeleteHabit();
+   const restoreMutation = useRestoreFromTrash();
 
-   const handleDeletePermanent = (id: string) => {
-      deleteMutation.mutate(id);
-      setTrashHabits((prev) => prev.filter((h) => h.id !== id));
-   };
+   const habitItems: HabitItem[] = useMemo(() => {
+      return serverTrashed.map((h, idx) => ({
+         id: h.id,
+         title: h.name,
+         startDate: h.startDate,
+         endDate: h.startDate,
+         goalTimes: 1,
+         currentTimes: 0,
+         repeat: h.frequency === "WEEKLY" ? "Weekly" : "Daily",
+         colour: PASTEL_COLORS[idx % PASTEL_COLORS.length],
+         status: "Trash",
+         labels:
+            h.labels && h.labels.length > 0 ? h.labels : ["Trashed Routine"],
+         streak: 0,
+      }));
+   }, [serverTrashed]);
 
-   const filteredHabits = trashHabits.filter(
+   const filteredHabits = habitItems.filter(
       (h) =>
          h.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
          h.labels.some((l) =>
             l.toLowerCase().includes(searchQuery.toLowerCase()),
          ),
    );
+
+   const handleDeletePermanent = (id: string) => {
+      deleteMutation.mutate(id);
+   };
+
+   const handleRestore = (id: string) => {
+      restoreMutation.mutate(id);
+   };
 
    return (
       <div className="space-y-6 animate-in fade-in-50 duration-200">
@@ -43,18 +69,26 @@ export const TrashPage = () => {
                </h1>
             </div>
             <span className="text-xs font-bold text-muted-foreground">
-               {filteredHabits.length} items in trash
+               {serverTrashed.length} items in trash
             </span>
          </div>
 
          {/* Grid of Trash Cards */}
-         {filteredHabits.length > 0 ? (
+         {isLoading ? (
+            <div className="py-16 flex flex-col items-center justify-center gap-3">
+               <Loader2 className="h-8 w-8 animate-spin text-primary" />
+               <p className="text-xs text-muted-foreground font-semibold">
+                  Loading trash...
+               </p>
+            </div>
+         ) : filteredHabits.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                {filteredHabits.map((habit) => (
                   <HabitCard
                      key={habit.id}
                      habit={habit}
                      mode="trash"
+                     onRestore={handleRestore}
                      onDeletePermanent={handleDeletePermanent}
                   />
                ))}

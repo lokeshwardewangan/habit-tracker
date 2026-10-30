@@ -8,10 +8,13 @@ import { completionsApi } from "../api/completions.api";
 import { dashboardApi } from "../api/dashboard.api";
 import { toast } from "sonner";
 
-export const useHabits = (status: "active" | "archived" | "all" = "active") => {
+export const useHabits = (
+   status: "active" | "archived" | "trashed" | "all" = "active",
+   date?: string,
+) => {
    return useQuery({
-      queryKey: ["habits", status],
-      queryFn: () => habitsApi.getHabits(status),
+      queryKey: ["habits", status, date],
+      queryFn: () => habitsApi.getHabits(status, date),
    });
 };
 
@@ -98,6 +101,36 @@ export const useUnarchiveHabit = () => {
          queryClient.invalidateQueries({ queryKey: ["habits"] });
          queryClient.invalidateQueries({ queryKey: ["stats"] });
          toast.success("Habit restored to active list");
+      },
+      onError: (err: { message?: string }) => {
+         toast.error(err.message || "Failed to restore habit");
+      },
+   });
+};
+
+export const useTrashHabit = () => {
+   const queryClient = useQueryClient();
+   return useMutation({
+      mutationFn: (id: string) => habitsApi.trashHabit(id),
+      onSuccess: () => {
+         queryClient.invalidateQueries({ queryKey: ["habits"] });
+         queryClient.invalidateQueries({ queryKey: ["stats"] });
+         toast.success("Habit moved to trash");
+      },
+      onError: (err: { message?: string }) => {
+         toast.error(err.message || "Failed to move habit to trash");
+      },
+   });
+};
+
+export const useRestoreFromTrash = () => {
+   const queryClient = useQueryClient();
+   return useMutation({
+      mutationFn: (id: string) => habitsApi.restoreFromTrash(id),
+      onSuccess: () => {
+         queryClient.invalidateQueries({ queryKey: ["habits"] });
+         queryClient.invalidateQueries({ queryKey: ["stats"] });
+         toast.success("Habit restored from trash");
       },
       onError: (err: { message?: string }) => {
          toast.error(err.message || "Failed to restore habit");

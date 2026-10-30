@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { HabitItem, HabitColor, HabitRepeat } from "@/types/habit";
+import { useLabels } from "@/hooks/useLabels";
+import { ActionTooltip } from "@/components/ui/tooltip";
 
 interface NewHabitModalProps {
    isOpen: boolean;
@@ -16,15 +18,19 @@ export const NewHabitModal = ({
    isOpen,
    onClose,
    onCreate,
-   availableLabels = ["Label 1", "Label 2", "Label 3"],
+   availableLabels: propLabels,
 }: NewHabitModalProps) => {
+   const { availableLabels: customLabels } = useLabels();
+   const activeLabels =
+      propLabels && propLabels.length > 0 ? propLabels : customLabels;
+
    const [name, setName] = useState("");
    const [startDate, setStartDate] = useState("26/05/2021");
    const [endDate, setEndDate] = useState("27/06/2021");
    const [goalTimes, setGoalTimes] = useState<number>(1);
    const [repeat, setRepeat] = useState<HabitRepeat>("Daily");
    const [colour, setColour] = useState<HabitColor>("blue");
-   const [selectedLabels, setSelectedLabels] = useState<string[]>(["Label 1"]);
+   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
 
    if (!isOpen) return null;
 
@@ -56,6 +62,7 @@ export const NewHabitModal = ({
 
       onCreate(newHabit);
       setName("");
+      setSelectedLabels([]);
       onClose();
    };
 
@@ -67,13 +74,16 @@ export const NewHabitModal = ({
                <h2 className="text-xl font-bold tracking-tight text-foreground">
                   New Habit
                </h2>
-               <button
-                  type="button"
-                  onClick={onClose}
-                  className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-               >
-                  <X className="h-5 w-5" />
-               </button>
+               <ActionTooltip content="Close">
+                  <button
+                     type="button"
+                     onClick={onClose}
+                     className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground cursor-pointer"
+                     aria-label="Close"
+                  >
+                     <X className="h-5 w-5" />
+                  </button>
+               </ActionTooltip>
             </div>
 
             {/* Modal Form */}
@@ -160,27 +170,28 @@ export const NewHabitModal = ({
                            "purple",
                         ] as HabitColor[]
                      ).map((c) => (
-                        <button
-                           key={c}
-                           type="button"
-                           onClick={() => setColour(c)}
-                           className={`h-7 w-7 rounded-full border-2 transition-transform ${
-                              colour === c
-                                 ? "scale-110 ring-2 ring-primary ring-offset-2"
-                                 : "opacity-80"
-                           } ${
-                              c === "blue"
-                                 ? "bg-blue-400 border-blue-500"
-                                 : c === "rose"
-                                   ? "bg-rose-400 border-rose-500"
-                                   : c === "amber"
-                                     ? "bg-amber-400 border-amber-500"
-                                     : c === "mint"
-                                       ? "bg-emerald-400 border-emerald-500"
-                                       : "bg-purple-400 border-purple-500"
-                           }`}
-                           title={c}
-                        />
+                        <ActionTooltip key={c} content={c.toUpperCase()}>
+                           <button
+                              type="button"
+                              onClick={() => setColour(c)}
+                              className={`h-7 w-7 rounded-full border-2 transition-transform cursor-pointer ${
+                                 colour === c
+                                    ? "scale-110 ring-2 ring-primary ring-offset-2"
+                                    : "opacity-80"
+                              } ${
+                                 c === "blue"
+                                    ? "bg-blue-400 border-blue-500"
+                                    : c === "rose"
+                                      ? "bg-rose-400 border-rose-500"
+                                      : c === "amber"
+                                        ? "bg-amber-400 border-amber-500"
+                                        : c === "mint"
+                                          ? "bg-emerald-400 border-emerald-500"
+                                          : "bg-purple-400 border-purple-500"
+                              }`}
+                              aria-label={c}
+                           />
+                        </ActionTooltip>
                      ))}
                   </div>
                </div>
@@ -188,21 +199,27 @@ export const NewHabitModal = ({
                {/* Select Labels */}
                <div className="space-y-2 pt-1">
                   <Label>Select Labels</Label>
-                  <div className="space-y-1.5">
-                     {availableLabels.map((lbl) => (
-                        <label
-                           key={lbl}
-                           className="flex items-center gap-2.5 text-sm cursor-pointer select-none"
-                        >
-                           <input
-                              type="checkbox"
-                              checked={selectedLabels.includes(lbl)}
-                              onChange={() => toggleLabel(lbl)}
-                              className="h-4 w-4 rounded border-input text-primary focus:ring-primary"
-                           />
-                           <span>{lbl}</span>
-                        </label>
-                     ))}
+                  <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                     {activeLabels.length > 0 ? (
+                        activeLabels.map((lbl) => (
+                           <label
+                              key={lbl}
+                              className="flex items-center gap-2.5 text-sm cursor-pointer select-none py-0.5 hover:text-foreground"
+                           >
+                              <input
+                                 type="checkbox"
+                                 checked={selectedLabels.includes(lbl)}
+                                 onChange={() => toggleLabel(lbl)}
+                                 className="h-4 w-4 rounded border-input text-primary focus:ring-primary cursor-pointer"
+                              />
+                              <span>{lbl}</span>
+                           </label>
+                        ))
+                     ) : (
+                        <div className="text-xs text-muted-foreground py-1">
+                           No labels created yet. Add them in the Labels page.
+                        </div>
+                     )}
                   </div>
                </div>
 
@@ -210,7 +227,7 @@ export const NewHabitModal = ({
                <div className="flex justify-end pt-4 border-t border-border">
                   <Button
                      type="submit"
-                     className="px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl"
+                     className="px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl cursor-pointer"
                   >
                      Done
                   </Button>

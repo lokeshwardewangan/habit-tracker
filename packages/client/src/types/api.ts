@@ -22,7 +22,7 @@ export interface User {
 }
 
 export type HabitFrequency = "DAILY" | "WEEKLY";
-export type HabitStatus = "ACTIVE" | "ARCHIVED";
+export type HabitStatus = "ACTIVE" | "ARCHIVED" | "TRASHED";
 
 export interface Habit {
    id: string;
@@ -32,6 +32,8 @@ export interface Habit {
    startDate: string;
    frequency: HabitFrequency;
    status: HabitStatus;
+   labels?: string[];
+   isCompletedToday?: boolean;
    createdAt: string;
    updatedAt: string;
 }

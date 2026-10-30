@@ -6,6 +6,7 @@ export interface CreateHabitPayload {
    description?: string;
    startDate: string;
    frequency: HabitFrequency;
+   labels?: string[];
 }
 
 export interface UpdateHabitPayload {
@@ -13,15 +14,18 @@ export interface UpdateHabitPayload {
    description?: string;
    startDate?: string;
    frequency?: HabitFrequency;
+   labels?: string[];
 }
 
 export const habitsService = {
    getHabits: async (
-      status: "active" | "archived" | "all" = "active",
+      status: "active" | "archived" | "trashed" | "all" = "active",
+      date?: string,
    ): Promise<Habit[]> => {
-      const response = await apiClient.get<ApiResponse<Habit[]>>(
-         `/habits?status=${status}`,
-      );
+      const url = date
+         ? `/habits?status=${status}&date=${date}`
+         : `/habits?status=${status}`;
+      const response = await apiClient.get<ApiResponse<Habit[]>>(url);
       return response.data.data || [];
    },
 
@@ -68,6 +72,20 @@ export const habitsService = {
    unarchiveHabit: async (id: string): Promise<Habit> => {
       const response = await apiClient.post<ApiResponse<Habit>>(
          `/habits/${id}/unarchive`,
+      );
+      return response.data.data!;
+   },
+
+   trashHabit: async (id: string): Promise<Habit> => {
+      const response = await apiClient.post<ApiResponse<Habit>>(
+         `/habits/${id}/trash`,
+      );
+      return response.data.data!;
+   },
+
+   restoreFromTrash: async (id: string): Promise<Habit> => {
+      const response = await apiClient.post<ApiResponse<Habit>>(
+         `/habits/${id}/restore`,
       );
       return response.data.data!;
    },
